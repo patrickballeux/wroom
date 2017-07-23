@@ -1,4 +1,4 @@
-# wroom
+# WRoom
 Browse the web in 3D
 
 #What is WRoom?
