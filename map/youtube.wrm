@@ -1,0 +1,75 @@
+# Set the title for the room
+title=WRoom Youtube Hall of Fame
+
+# Load the textures
+texture=wall01.png
+texture=metal.jpg
+floor=floor.png
+ceiling=rect4536.png
+
+#Load background sound file
+#backgroundsound=background011.wav
+
+# Set the map
+# 15x10
+map=1,1,1,1,1
+map=1,0,0,0,1
+map=1,0,0,1,1
+map=1,0,0,0,1
+map=1,0,0,1,1
+map=1,0,0,0,1
+map=1,0,0,1,1
+map=1,0,0,0,1
+map=1,0,0,1,1
+map=1,0,0,0,1
+map=1,0,0,1,1
+map=1,0,0,0,1
+map=1,0,0,1,1
+map=1,0,0,0,1
+map=1,0,0,1,1
+map=1,0,0,0,1
+map=1,0,0,1,1
+map=1,0,0,0,1
+map=1,0,0,1,1
+map=1,0,0,0,1
+map=1,1,1,1,1
+
+#Set the starting point
+start=1,1
+
+# Define the actions
+# Actions are: teleport, sound, message, download
+# After the action command, enter the location of the action x,y
+# Then the parameter
+# action=teleport,x,y,URL
+# action=sound,x,y,sound.wav
+# action=message,x,y,Message string...
+# Actions are triggered by pressing the action key: space bar...
+
+action=teleport,1,19,http://crombz.com/wroom
+action=sound,1,19,teleport.wav
+
+#action=download,6,6,http://crombz.com/wroom/floor.jpg
+# Load text to display on walls
+# TEXT=x,7,HTML text entry...  
+text=3,2,<div style='text-align:center;'><img src='http://img.youtube.com/vi/z0mCfJUwJRE/0.jpg' width=256 height=256></div>
+action=embeded,2,2,youtube=z0mCfJUwJRE
+text=3,4,<div style='text-align:center;'><img src='http://img.youtube.com/vi/4e4bAsQ4r30/0.jpg' width=256 height=256></div>
+action=embeded,2,4,youtube=4e4bAsQ4r30
+text=3,6,<div style='text-align:center;'><img src='http://img.youtube.com/vi/pLFR7dLtdY8/0.jpg' width=256 height=256></div>
+action=embeded,2,6,youtube=pLFR7dLtdY8
+text=3,8,<div style='text-align:center;'><img src='http://img.youtube.com/vi/_Tdrrq5IFzI/0.jpg' width=256 height=256></div>
+action=embeded,2,8,youtube=_Tdrrq5IFzI
+text=3,10,<div style='text-align:center;'><img src='http://img.youtube.com/vi/KNjhiGHpaGU/0.jpg' width=256 height=256></div>
+action=embeded,2,10,youtube=KNjhiGHpaGU
+text=3,12,<div style='text-align:center;'><img src='http://img.youtube.com/vi/R15vgoKk7K8/0.jpg' width=256 height=256></div>
+action=embeded,2,12,youtube=R15vgoKk7K8
+text=3,14,<div style='text-align:center;'><img src='http://img.youtube.com/vi/KPoY9-08KqQ/0.jpg' width=256 height=256></div>
+action=embeded,2,14,youtube=KPoY9-08KqQ
+text=3,16,<div style='text-align:center;'><img src='http://img.youtube.com/vi/YMbU1XF8-UM/0.jpg' width=256 height=256></div>
+action=embeded,2,16,youtube=YMbU1XF8-UM
+text=3,18,<div style='text-align:center;'><img src='http://img.youtube.com/vi/KmYSnvT2o_M/0.jpg' width=256 height=256></div>
+action=embeded,2,18,youtube=KmYSnvT2o_M
+
+
+text=0,5,<div>Press SPACE in front of each video to watch.</div>

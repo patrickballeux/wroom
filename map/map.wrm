@@ -1,0 +1,89 @@
+# Set the title for the room
+title=WRoom Homebase
+#Set the IIRC chatroom...
+chatroom=#wroom
+server=irc.freenode.net
+port=6667
+# Load the textures
+texture=wall03.png
+texture=wall01.png,wall02.png,wall03.png,wall04.png,wall05.png
+texture=metal.jpg
+floor=floor.png
+ceiling=rect4536.png
+
+#Load background sound file
+backgroundsound=background011.wav
+
+# Set the map
+# 15x10
+map=1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+map=1,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+map=1,0,0,0,0,0,0,0,0,0,0,2,0,0,1
+map=1,0,0,0,0,0,0,0,0,0,0,3,0,0,1
+map=1,0,0,0,0,0,0,0,0,0,0,2,0,0,1
+map=1,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+map=1,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+map=1,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+map=1,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+map=1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+
+#Set the starting point
+start=1,1
+
+# Define the actions
+# Actions are: teleport, sound, message, download
+# After the action command, enter the location of the action x,y
+# Then the parameter
+# action=teleport,x,y,URL
+# action=sound,x,y,sound.wav
+# action=message,x,y,Message string...
+# Actions are triggered by pressing the action key: space bar...
+action=teleport,7,7,http://crombz.com/wroom/smallroom.wrm
+action=sound,7,7,teleport.wav
+action=teleport,5,7,http://crombz.com/wroom/youtube.wrm
+action=sound,5,7,teleport.wav
+action=door,10,3,11x3
+action=door,12,3,11x3
+
+#action=download,6,6,http://crombz.com/wroom/floor.jpg
+action=message,6,7,You are near a teleporter...
+action=media,1,6,http://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4
+action=message,1,6,Playing Big Buck Bunny video...
+
+action=browse,7,1,http://screenstudio.crombz.com
+action=message,7,1,Opening ScreenStudio homepage...
+
+action=browse,5,6,https://twitter.com/patrickballeux
+action=message,5,6,Opening my Twitter account...
+action=browse,6,5,https://twitter.com/patrickballeux
+action=message,6,5,Opening my Twitter account...
+action=browse,6,4,https://twitter.com/patrickballeux
+action=message,6,4,Opening my Twitter account...
+action=browse,4,5,https://twitter.com/patrickballeux
+action=message,4,5,Opening my Twitter account...
+
+action=browse,10,6,https://vid.me/patrickballeux
+action=message,10,6,Opening Vid.me channel...
+action=browse,9,5,https://vid.me/patrickballeux
+action=message,9,5,Opening Vid.me channel...
+action=browse,10,4,https://vid.me/patrickballeux
+action=message,10,4,Opening Vid.me channel...
+action=embeded,11,5,vidme=7p4U5
+action=message,11,5,Opening Vid.me channel...
+
+
+# Load text to display on walls
+# TEXT=x,7,HTML text entry...  
+#text=8,8,<div  style='height:200px;font-size:16px;border:1px solid black;background-color:#FFFFFF;color:red;'>Teleport to Home base<br>Press SPACE</div>
+text=0,2,<p>Welcome to my WRoom!</p><p style='border:1px solid black;background-color:#FFFFFF;color:red;'>Basic HTML tags are supported...</p>
+text=0,3,<p style='border:1px solid black;background-color:#FFFFFF;color:black;'>The image on the left is showing a live camera feed from Trois-Rivieres, Canada</p>
+text=0,4,<img src='http://www.quebec511.info/Images/Cameras/TroisRivieres/cam/011.jpg?636351486600000000' width=256 />
+text=0,5,<center><img src='http://weather.gc.ca/data/satellite/goes_eusa_1070_100.jpg' width=200 height=200 /></center><div style='text-align:center;font-size:14px;border:1px solid black;background-color:#FFFFFF;color:black;'>Weather map Canada</div>
+text=0,6,<div style='font-size:12px;text-align:center;'>Watch Big Buck Bunny<br>(Press Space!)</div><center><img src='https://peach.blender.org/wp-content/uploads/its-a-trap.png' width=200 height=200 />
+
+text=5,0,<div>WebcamStudio</div><img src='https://github.com/WebcamStudio/webcamstudio/raw/master/src/webcamstudio/resources/splash.png' width=200 height=200 />
+text=6,0,<div>JapelServer</div><img src='https://a.fsdn.com/con/app/proj/japelserver/screenshots/244374.jpg/1' width=200 height=200 />
+text=7,0,<div>ScreenStudio</div><img src='http://www.crombz.com/wroom/screenstudio.png' width=200 height=200 />
+
+text=5,5,<div style='color:white;font-size:12px;text-align:center;'>Follow me on Twitter: @patrickballeux</div><center><img src='https://pbs.twimg.com/profile_images/512735871548665857/TcE8kqVn_400x400.jpeg' width=200 height=200 />
+text=10,5,<div style='color:white;font-size:12px;text-align:center;'>vid.me/patrickballeux</div><center><img src='https://pbs.twimg.com/media/BvMSJWWCcAAZqCr.jpg' width=200 height=200 />
