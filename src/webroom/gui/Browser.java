@@ -80,7 +80,7 @@ public class Browser extends javax.swing.JFrame implements Message {
         rendStatus = new RendererStatus();
         setTitle("WRoom (v" + WebRoom.VERSION + ")");
         preferences = java.util.prefs.Preferences.userNodeForPackage(this.getClass());
-        cboURLs.insertItemAt(preferences.get("homepage", "http://crombz.com/wroom"), 0);
+        cboURLs.insertItemAt(preferences.get("homepage", "http://wroom.crombz.com"), 0);
         cboURLs.setSelectedIndex(0);
         userModel = new DefaultListModel<>();
         lstUsers.setModel(userModel);
@@ -301,7 +301,7 @@ public class Browser extends javax.swing.JFrame implements Message {
         });
 
         cboURLs.setEditable(true);
-        cboURLs.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "http://crombz.com/wroom" }));
+        cboURLs.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "http://wroom.crombz.com" }));
         cboURLs.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cboURLsActionPerformed(evt);
@@ -474,8 +474,8 @@ public class Browser extends javax.swing.JFrame implements Message {
     }//GEN-LAST:event_mnuEditSetHomepageActionPerformed
 
     private void mnuEditGoToHomepageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuEditGoToHomepageActionPerformed
-        cboURLs.removeItem(preferences.get("homepage", "http://crombz.com/wroom"));
-        cboURLs.insertItemAt(preferences.get("homepage", "http://crombz.com/wroom"), 0);
+        cboURLs.removeItem(preferences.get("homepage", "http://wroom.crombz.com"));
+        cboURLs.insertItemAt(preferences.get("homepage", "http://wroom.crombz.com"), 0);
         cboURLs.setSelectedIndex(0);
     }//GEN-LAST:event_mnuEditGoToHomepageActionPerformed
 

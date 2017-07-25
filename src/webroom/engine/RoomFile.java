@@ -7,6 +7,7 @@ package webroom.engine;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.TreeMap;
@@ -54,10 +55,46 @@ public class RoomFile {
             }
         } else {
             finalURL = base.toString();
-
             base = new URL(base.toString().substring(0, base.toString().lastIndexOf("/")));
         }
-        InputStream in = new URL(finalURL).openStream();
+        InputStream in;
+        if (finalURL.toString().startsWith("http")) {
+            URL http = new URL(finalURL);
+            HttpURLConnection conn = (HttpURLConnection) http.openConnection();
+            conn.setReadTimeout(5000);
+            conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+            conn.addRequestProperty("User-Agent", "Mozilla");
+            conn.addRequestProperty("Referer", "google.com");
+            boolean redirect = false;
+            // normally, 3xx is redirect
+            int status = conn.getResponseCode();
+            if (status != HttpURLConnection.HTTP_OK) {
+                if (status == HttpURLConnection.HTTP_MOVED_TEMP
+                        || status == HttpURLConnection.HTTP_MOVED_PERM
+                        || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                    redirect = true;
+                }
+            }
+
+            if (redirect) {
+
+                // get redirect url from "location" header field
+                String newUrl = conn.getHeaderField("Location");
+
+                // get the cookie if need, for login
+                String cookies = conn.getHeaderField("Set-Cookie");
+
+                // open the new connnection again
+                conn = (HttpURLConnection) new URL(newUrl).openConnection();
+                conn.setRequestProperty("Cookie", cookies);
+                conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+                conn.addRequestProperty("User-Agent", "Mozilla");
+                conn.addRequestProperty("Referer", "google.com");
+            }
+            in = conn.getInputStream();
+        } else {
+            in = new URL(finalURL).openStream();
+        }
         byte[] buffer = new byte[65536 * 4];
         listener.status("Loading map...");
         int count = in.read(buffer);

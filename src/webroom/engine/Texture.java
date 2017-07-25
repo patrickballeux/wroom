@@ -25,12 +25,16 @@ public class Texture implements Runnable {
     private boolean mStopMe = false;
     private URL url = null;
     JLabel label = null;
+    private boolean mIsReady = false;
 
     @Override
     public void run() {
         animate();
     }
 
+    public boolean isReady(){
+        return mIsReady;
+    }
     public Texture(URL[] urls) {
         animated = new Texture[urls.length];
         for (int i = 0; i < urls.length; i++) {
@@ -78,6 +82,13 @@ public class Texture implements Runnable {
         pixels = new int[SIZE * SIZE];
         BufferedImage originalImage = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_ARGB);
         if (original != null) {
+            while (!original.isReady()){
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Texture.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
             if (original.animated.length > 0) {
                 animated = new Texture[original.animated.length];
                 for (int i = 0; i < animated.length; i++) {
@@ -85,13 +96,6 @@ public class Texture implements Runnable {
                 }
                 originalImage = animated[0].image;
             } else {
-                while (original.image == null) {
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(Texture.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
                 originalImage = original.image;
             }
 
@@ -105,9 +109,9 @@ public class Texture implements Runnable {
                 Logger.getLogger(Texture.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else if (animated.length > 0) {
-            while (animated[0].image == null) {
+            while (!animated[0].isReady()) {
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(50);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Texture.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -124,12 +128,13 @@ public class Texture implements Runnable {
         g.drawImage(originalImage, 0, 0, null);
         pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
         initLabel(g);
+        mIsReady = true;
         if (animated.length > 0) {
             int index = 0;
             while (!mStopMe) {
-                while (animated[index].image == null) {
+                while (!animated[index].isReady()) {
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(50);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(Texture.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -147,5 +152,4 @@ public class Texture implements Runnable {
         }
         g.dispose();
     }
-
 }
