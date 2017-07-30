@@ -170,13 +170,12 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
     }
 
     public void paint(Graphics g) {
-        super.paint(g);
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, getWidth(), getHeight());
         try {
             screen.update(camera, pixels);
             camera.update(map);
             if (System.currentTimeMillis() - startTime < 1000) {
-                g.setColor(Color.BLACK);
-                g.fillRect(0, 0, getWidth(), getHeight());
                 ((Graphics2D) g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ((System.currentTimeMillis() - startTime) / 1000.0f)));
             }
         } catch (Exception ex) {
