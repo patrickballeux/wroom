@@ -191,6 +191,7 @@ public class Browser extends javax.swing.JFrame implements Message {
             public void onDisconnected() {
                 super.onDisconnected(); //To change body of generated methods, choose Tools | Templates.
                 renderer.addMessage("# Disconnected");
+                irc = null;
             }
 
             @Override
