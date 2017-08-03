@@ -6,6 +6,7 @@
 package webroom.engine;
 
 import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -41,6 +42,10 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
     private Texture user;
     private String userID;
     private String baseURL;
+    private int deltaSteps = 0;
+    private int deltaStepsDir = 1;
+    private static int STEPHEIGHT = 3;
+    private static BasicStroke lineWidth = new BasicStroke(15);
 
     /**
      * Creates new form Renderer
@@ -122,7 +127,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             map[y][x] = textures.size();
         }
         camera = new Camera(startX, startY, 1, 0, 0, -.66, listener, getBounds());
-        screen = new Screen(map, textures, getWidth(), getHeight(), floor, ceiling, sprites);
+        screen = new Screen(map, textures, getWidth() - STEPHEIGHT, getHeight() - STEPHEIGHT, floor, ceiling, sprites);
         thread = new Thread(this);
         addKeyListener(camera);
         this.setOpaque(true);
@@ -181,7 +186,16 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         } catch (Exception ex) {
             System.err.println("ERROR: " + ex.getMessage());
         }
-        g.drawImage(image, 0, 0, this);
+        if (camera.back || camera.forward) {
+            deltaSteps += deltaStepsDir;
+            if (Math.abs(deltaSteps) > STEPHEIGHT) {
+                deltaStepsDir = deltaStepsDir * -1;
+            }
+        } else {
+            deltaSteps = 0;
+            deltaStepsDir = 1;
+        }
+        g.drawImage(image, 0, 0 + deltaSteps, this);
         g.setFont(new Font("Monospaced", Font.BOLD, 16));
         int y = 20;
         for (int i = 0; i < userMessages.size(); i++) {
@@ -192,6 +206,9 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             g.drawString(m, 10, y);
             y += 20;
         }
+        g.setColor(Color.BLACK);
+        ((Graphics2D) g).setStroke(lineWidth);
+        g.drawRect(0, 0, getWidth(), getHeight());
     }
 
     /**
@@ -246,6 +263,10 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
 
     private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
         this.requestFocus();
+        if (evt.getClickCount() == 2) {
+            String loc = "#ACTION=" + (int) camera.yPos + "," + (int) camera.xPos;
+            listener.status(loc);
+        }
     }//GEN-LAST:event_formMouseClicked
 
     private void formFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_formFocusGained

@@ -13,7 +13,7 @@ import webroom.gui.Browser;
  */
 public class WebRoom {
 
-    public static final String VERSION = "0.0.8 ALPHA"; 
+    public static final String VERSION = "0.0.9 ALPHA"; 
    /**
      * @param args the command line arguments
      */
