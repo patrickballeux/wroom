@@ -39,6 +39,7 @@ import webroom.WebRoom;
 import webroom.engine.Message;
 import webroom.engine.Renderer;
 import webroom.engine.RoomFile;
+import webroom.engine.Sprite;
 import webroom.engine.Teleport;
 import webroom.engine.Texture;
 
@@ -70,6 +71,8 @@ public class Browser extends javax.swing.JFrame implements Message {
     private int chatPort;
     private DefaultListModel<String> userModel;
     private boolean requestingUserList = false;
+    private ArrayList<Sprite> userSprites = new ArrayList<Sprite>();
+    private Texture userImage;
 
     /**
      * Creates new form Browser
@@ -85,6 +88,8 @@ public class Browser extends javax.swing.JFrame implements Message {
         userModel = new DefaultListModel<>();
         lstUsers.setModel(userModel);
         txtChat.setEnabled(false);
+        userImage = new Texture(getClass().getResource("/webroom/engine/user.png"));
+
         this.pack();
     }
 
@@ -118,6 +123,12 @@ public class Browser extends javax.swing.JFrame implements Message {
                     renderer.addMessage("# " + user + " has joinded...");
                     userModel.addElement(user.toString());
                     lstUsers.setSelectedValue(user.toString(), true);
+                    Sprite s = new Sprite();
+                    s.x = 0;
+                    s.y = 0;
+                    s.texture = new Texture(userImage, "<div style='text-align:center;color:white;background-color:#111;'>"+user.getNick()+"</div>", 0);
+                    s.id = user.getNick();
+                    userSprites.add(s);
                 }
             }
 
@@ -150,6 +161,13 @@ public class Browser extends javax.swing.JFrame implements Message {
                         String[] users = msg.split(" ");
                         for (String s : users) {
                             userModel.addElement(s);
+                            Sprite sp = new Sprite();
+                            sp.x = 0;
+                            sp.y = 0;
+                            sp.texture = new Texture(userImage, "<div style='text-align:center;color:white;background-color:#111;'>"+s+"</div>", 0);
+                            sp.id = s.replaceFirst("@", "");
+                            userSprites.add(sp);
+                            System.out.println("Added sprite for usre: " + s);
                         }
                     }
                 }
@@ -192,13 +210,43 @@ public class Browser extends javax.swing.JFrame implements Message {
                 super.onQuit(user, msg); //To change body of generated methods, choose Tools | Templates.
                 renderer.addMessage("# " + user + " has left - " + msg);
                 userModel.removeElement(user.toString());
+                Sprite s = null;
+                for (Sprite u : userSprites) {
+                    if (u.id.equals(user.getNick())) {
+                        s = u;
+                        break;
+                    }
+                }
+                if (s != null) {
+                    userSprites.remove(s);
+                }
             }
 
             @Override
             public void onPrivmsg(String target, IRCUser user, String msg) {
                 super.onPrivmsg(target, user, msg); //To change body of generated methods, choose Tools | Templates.
-                renderer.addMessage(user + "> " + msg);
-                lstUsers.setSelectedValue(user.toString(), true);
+                if (msg.startsWith("MOVING TO:")) {
+                    double x = Double.parseDouble(msg.split(":")[1].split("x")[0]);
+                    double y = Double.parseDouble(msg.split(":")[1].split("x")[1]);
+                    for (Sprite s : userSprites) {
+                        if (s.id.equals(user.getNick())) {
+                            s.x = x;
+                            s.y = y;
+                            System.out.println("Moving user " + user.getNick());
+                            break;
+                        }
+                    }
+                } else {
+                    renderer.addMessage(user + "> " + msg);
+                    for (Sprite s : userSprites) {
+                        if (s.id.equals(user.getNick())) {
+                            s.texture = new Texture(userImage, "<div style='font-size:12px;text-align:center;color:white;background-color:#111;'>"+user.getNick()+"<hr>"+msg+"</div>", 0);
+                            break;
+                        }
+                    }
+
+                    lstUsers.setSelectedValue(user.toString(), true);
+                }
             }
 
         });
@@ -489,6 +537,7 @@ public class Browser extends javax.swing.JFrame implements Message {
                 String msg = txtChat.getText();
                 if (!msg.startsWith("/")) {
                     irc.doPrivmsg(chatroom, msg);
+                    irc.doPrivmsg(chatroom,"MOVING TO:" +renderer.getCamera().xPos + "x" + renderer.getCamera().yPos);
                     renderer.addMessage("Me>" + msg);
                 }
                 txtChat.setText("");
@@ -780,7 +829,8 @@ public class Browser extends javax.swing.JFrame implements Message {
                         chatPort = f.getChatPort();
                         rendStatus.updateStatus("Setting up the renderer...");
                         String id = url.toString().hashCode() + "";
-                        renderer = new Renderer(f, listener, id);
+                        userSprites.clear();
+                        renderer = new Renderer(f, listener, userSprites);
                         if (irc == null) {
                             connectToIRC();
                         } else {

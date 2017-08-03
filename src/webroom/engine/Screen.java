@@ -2,15 +2,6 @@ package webroom.engine;
 
 import java.util.ArrayList;
 
-class Sprite {
-
-    double x;
-    double y;
-    Texture texture;
-    double distance;
-    String id = "";
-}
-
 public class Screen {
 
     private final int[][] map;
@@ -19,8 +10,8 @@ public class Screen {
     private final Texture floor;
     private final Texture ceiling;
     private ArrayList<Sprite> systemSprites;
-
-    public Screen(int[][] m, ArrayList<Texture> tex, int w, int h, Texture f, Texture c,  ArrayList<Sprite> sprites) {
+    private ArrayList<Sprite> userSprites;
+    public Screen(int[][] m, ArrayList<Texture> tex, int w, int h, Texture f, Texture c,  ArrayList<Sprite> sprites,ArrayList<Sprite> usersprites) {
         // inverse x and y as calculus are made for y,x
         map = m;
         textures = tex;
@@ -29,7 +20,8 @@ public class Screen {
         floor = f;
         ceiling = c;
         this.systemSprites = sprites;
-    }
+    this.userSprites = usersprites;
+    }   
 
     public int[] update(Camera camera, int[] pixels) {
         double[] ZBuffer = new double[width];
@@ -178,6 +170,7 @@ public class Screen {
         //sort sprites from far to close
         ArrayList<Sprite> sprites = new ArrayList<>();
         sprites.addAll(systemSprites);
+        sprites.addAll(userSprites);
         for (int i = 0; i < sprites.size(); i++) {
             sprites.get(i).distance = ((camera.xPos - sprites.get(i).y) * (camera.xPos - sprites.get(i).y) + (camera.yPos - sprites.get(i).x) * (camera.yPos - sprites.get(i).x)); //sqrt not taken, unneeded
         }

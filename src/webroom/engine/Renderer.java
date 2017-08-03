@@ -36,29 +36,24 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
     private long startTime = System.currentTimeMillis();
     private ArrayList<String> userMessages = new ArrayList<>();
     private ArrayList<Sprite> sprites;
+    private ArrayList<Sprite> userSprites;
     private Message listener;
-    private String wroomID;
-    private int systemSpriteCount;
-    private Texture user;
-    private String userID;
-    private String baseURL;
     private int deltaSteps = 0;
     private int deltaStepsDir = 1;
-    private static int STEPHEIGHT = 3;
-    private static BasicStroke lineWidth = new BasicStroke(15);
+    private static final int STEPHEIGHT = 3;
+    private static final BasicStroke lineWidth = new BasicStroke(15);
 
     /**
      * Creates new form Renderer
      *
      */
-    public Renderer(RoomFile file, Message listener, String id) {
+    public Renderer(RoomFile file, Message listener,ArrayList<Sprite>userSprites) {
         initComponents();
+        this.userSprites = userSprites;
         textures = file.getTextures();
-        wroomID = id;
         floor = file.getFloor();
         ceiling = file.getCeiling();
         map = file.getMap();
-        userID = java.util.UUID.randomUUID().toString();
         this.listener = listener;
         double startX = file.getStartX();
         double startY = file.getStartY();
@@ -81,7 +76,6 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         }
         this.teleports = file.getTeleports();
         Texture teleporticon = new Texture(getClass().getResource("/webroom/gui/teleport.png"));
-        user = new Texture(getClass().getResource("/webroom/engine/user.png"));
         sprites = new ArrayList<>();
         for (String key : teleports.keySet()) {
             Sprite s = new Sprite();
@@ -95,8 +89,6 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             s.distance = 0;
             sprites.add(s);
         }
-
-        systemSpriteCount = sprites.size();
         for (String key : file.getTexts().keySet()) {
             int x = Integer.parseInt(key.split(",")[0]);
             int y = Integer.parseInt(key.split(",")[1]);
@@ -127,7 +119,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             map[y][x] = textures.size();
         }
         camera = new Camera(startX, startY, 1, 0, 0, -.66, listener, getBounds());
-        screen = new Screen(map, textures, getWidth() - STEPHEIGHT, getHeight() - STEPHEIGHT, floor, ceiling, sprites);
+        screen = new Screen(map, textures, getWidth() - STEPHEIGHT, getHeight() - STEPHEIGHT, floor, ceiling, sprites,userSprites);
         thread = new Thread(this);
         addKeyListener(camera);
         this.setOpaque(true);
@@ -282,7 +274,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             int h = getHeight() / 2 * 2;
             image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
             pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-            screen = new Screen(map, textures, image.getWidth(), image.getHeight(), floor, ceiling, sprites);
+            screen = new Screen(map, textures, image.getWidth(), image.getHeight(), floor, ceiling, sprites,userSprites);
             camera.setSize(getBounds());
         }
 
