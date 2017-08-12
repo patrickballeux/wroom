@@ -119,7 +119,9 @@ public class Screen {
             for (int y = drawStart; y < drawEnd; y++) {
                 int texY = (((y * 2 - height + lineHeight) << 8) / lineHeight) / 2;
                 int color = textures.get(texNum).pixels[texX + (texY * textures.get(texNum).SIZE)];
-                pixels[x + y * (width)] = color;
+                int alpha = (lineHeight * 255 / Texture.SIZE)+50;
+                if (alpha > 255) alpha = 255;
+                pixels[x + y * (width)] = color & ((alpha<<24)|0xFFFFFF);
             }
             ZBuffer[x] = perpWallDist; //perpendicular distance is used
             //FLOOR CASTING
@@ -157,11 +159,14 @@ public class Screen {
                 floorTexX = (int) (currentFloorX * floor.SIZE) % floor.SIZE;
                 floorTexY = (int) (currentFloorY * floor.SIZE) % floor.SIZE;
                 //ceiling (symmetrical!)
+                int alpha = (int)((y-(height/2)) * 255 / (height/2))+50;
+                if (alpha > 255) alpha = 255;
+                if (alpha < 0) alpha = 0;
                 int ceilingColor = ceiling.pixels[(ceiling.SIZE * floorTexY) + floorTexX];
-                pixels[x + ((height - y) * width)] = ceilingColor;
+                pixels[x + ((height - y) * width)] = ceilingColor & ((alpha<<24)|0xFFFFFF);
                 //floor
                 int floorColor = floor.pixels[floor.SIZE * floorTexY + floorTexX];
-                pixels[x + (y * width)] = floorColor;
+                pixels[x + (y * width)] = floorColor & ((alpha<<24)|0xFFFFFF);
             }
 
         }
@@ -215,6 +220,8 @@ public class Screen {
             if (drawEndX >= width) {
                 drawEndX = width - 1;
             }
+            int alpha = (spriteHeight * 255 / height)+50;
+            if (alpha > 255) alpha = 255;
             //loop through every vertical stripe of the sprite on screen
             for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
                 int texX = (int) (256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * Texture.SIZE / spriteWidth) / 256;
@@ -226,7 +233,7 @@ public class Screen {
 
                         int color = sprites.get(i).texture.pixels[(Texture.SIZE * texY) + texX]; //get current color from the texture
                         if ((color & 0x00FFFFFF) != 0) {
-                            pixels[(y * width) + stripe] = color; //paint pixel if it isn't black, black is the invisible color
+                            pixels[(y * width) + stripe] = color & ((alpha<<24) | 0xFFFFFF); //paint pixel if it isn't black, black is the invisible color
                         }
                     }
                 }

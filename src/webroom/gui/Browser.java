@@ -94,6 +94,9 @@ public class Browser extends javax.swing.JFrame implements Message {
     }
 
     private void connectToIRC() throws IOException, KeyManagementException, NoSuchAlgorithmException {
+        if (WebRoom.NOCHAT) {
+            return;
+        }
         txtChat.setEnabled(false);
         IRCConfig config;
         IRCConfigBuilder builder = IRCConfigBuilder.newBuilder();
@@ -126,7 +129,7 @@ public class Browser extends javax.swing.JFrame implements Message {
                     Sprite s = new Sprite();
                     s.x = 0;
                     s.y = 0;
-                    s.texture = new Texture(userImage, "<div style='text-align:center;color:white;background-color:#111;'>"+user.getNick()+"</div>", 0);
+                    s.texture = new Texture(userImage, "<div style='text-align:center;color:white;background-color:#111;'>" + user.getNick() + "</div>", 0);
                     s.id = user.getNick();
                     userSprites.add(s);
                 }
@@ -164,7 +167,7 @@ public class Browser extends javax.swing.JFrame implements Message {
                             Sprite sp = new Sprite();
                             sp.x = 0;
                             sp.y = 0;
-                            sp.texture = new Texture(userImage, "<div style='text-align:center;color:white;background-color:#111;'>"+s+"</div>", 0);
+                            sp.texture = new Texture(userImage, "<div style='text-align:center;color:white;background-color:#111;'>" + s + "</div>", 0);
                             sp.id = s.replaceFirst("@", "");
                             userSprites.add(sp);
                             System.out.println("Added sprite for usre: " + s);
@@ -241,7 +244,7 @@ public class Browser extends javax.swing.JFrame implements Message {
                     renderer.addMessage(user + "> " + msg);
                     for (Sprite s : userSprites) {
                         if (s.id.equals(user.getNick())) {
-                            s.texture = new Texture(userImage, "<div style='font-size:12px;text-align:center;color:white;background-color:#111;'>"+user.getNick()+"<hr>"+msg+"</div>", 0);
+                            s.texture = new Texture(userImage, "<div style='font-size:12px;text-align:center;color:white;background-color:#111;'>" + user.getNick() + "<hr>" + msg + "</div>", 0);
                             break;
                         }
                     }
@@ -538,7 +541,7 @@ public class Browser extends javax.swing.JFrame implements Message {
                 String msg = txtChat.getText();
                 if (!msg.startsWith("/")) {
                     irc.doPrivmsg(chatroom, msg);
-                    irc.doPrivmsg(chatroom,"MOVING TO:" +renderer.getCamera().xPos + "x" + renderer.getCamera().yPos);
+                    irc.doPrivmsg(chatroom, "MOVING TO:" + renderer.getCamera().xPos + "x" + renderer.getCamera().yPos);
                     renderer.addMessage("Me>" + msg);
                 }
                 txtChat.setText("");
@@ -595,6 +598,33 @@ public class Browser extends javax.swing.JFrame implements Message {
         if (msg.startsWith("#")) {
             if (msg.startsWith("#ACTION=")) {
                 String loc = msg.split("=")[1].trim();
+                //Check around is a texture is media playable...
+                int x = Integer.parseInt(loc.split(",")[0]);
+                int y = Integer.parseInt(loc.split(",")[1]);
+                Texture mediaTexture = null;
+                for (int i = x - 1; i <= x + 1; i++) {
+                    for (int j = y - 1; j <= y + 1; j++) {
+                        if (renderer.getMap()[j][i] > 0) {
+                            Texture t = renderer.getTextures().get(renderer.getMap()[j][i] - 1);
+                            System.out.println("testing texture " + renderer.getMap()[j][i]);
+                            if (t.hasMedia()) {
+                                mediaTexture = t;
+                                System.out.println("Texture has media");
+                                break;
+                            }
+                        }
+                    }
+                    if (mediaTexture != null) {
+                        break;
+                    }
+                }
+                if (mediaTexture != null) {
+                    if (mediaTexture.isMediaPlaying()) {
+                        mediaTexture.stopMedia();
+                    } else {
+                        mediaTexture.playMedia();
+                    }
+                }
                 if (sounds.containsKey(loc)) {
                     playSound(sounds.get(loc));
                 }

@@ -81,7 +81,14 @@ public class RoomFile {
                     Texture t = new Texture(urlsObj);
                     textures.add(t);
                 } else {
-                    URL file = new URL(base.toString() + "/" + data);
+                    URL file = null;
+                    if (data.startsWith("http:")) {
+                        file = new URL(data);
+                    } else if (data.startsWith("file:")) {
+                        file = new URL(data);
+                    } else {
+                        file = new URL(base.toString() + "/" + data);
+                    }
                     Texture t = new Texture(file);
                     textures.add(t);
                 }

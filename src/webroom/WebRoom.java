@@ -14,10 +14,19 @@ import webroom.gui.Browser;
 public class WebRoom {
 
     public static final String VERSION = "0.0.9 ALPHA"; 
+    public static boolean NOCHAT = false; 
    /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        for (String a : args){
+            switch(a){
+                case "NOCHAT":
+                    NOCHAT=true;
+                    break;
+            }
+                    
+        }
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.

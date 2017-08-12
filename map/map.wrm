@@ -8,11 +8,13 @@ port=6667
 texture=wall03.png
 texture=wall01.png,wall02.png,wall03.png,wall04.png,wall05.png
 texture=metal.jpg
+texture=http://wroom.crombz.com/BigBuckBunny_640x360.mp4
+texture=metal.jpg
 floor=floor.png
-ceiling=rect4536.png
+ceiling=floor.png
 
 #Load background sound file
-backgroundsound=background011.wav
+#backgroundsound=background011.wav
 
 # Set the map
 # 15x10
@@ -25,7 +27,7 @@ map=1,0,0,0,0,0,0,0,0,0,0,0,0,0,1
 map=1,0,0,0,0,0,0,0,0,0,0,0,0,0,1
 map=1,0,0,0,0,0,0,0,0,0,0,0,0,0,1
 map=1,0,0,0,0,0,0,0,0,0,0,0,0,0,1
-map=1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+map=1,1,1,1,1,1,1,1,4,1,1,1,1,1,1
 
 #Set the starting point
 start=1,1
