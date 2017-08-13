@@ -168,7 +168,7 @@ public class SourceFFMpeg {
                 }
             }
         }).start();
-        String filter = " -filter:v scale=" + Texture.SIZE +":-1,pad="+Texture.SIZE+":"+ Texture.SIZE +":(ow-iw)/2:(oh-ih)/2 "; 
+        String filter = " -filter:v scale=" + Texture.SIZE + ":-1,pad=" + Texture.SIZE + ":" + Texture.SIZE + ":(ow-iw)/2:(oh-ih)/2 ";
         String command = "libs/ffmpeg.exe  -v 0 -i " + mInput + " " + filter + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
         if (!isWindows()) {
             if (isOSX()) {
@@ -211,16 +211,18 @@ public class SourceFFMpeg {
         g.dispose();
         mTexture.pixels = ((DataBufferInt) mTexture.image.getRaster().getDataBuffer()).getData();
         mStopMe = true;
-        mProcess.getOutputStream().write("q\n".getBytes());
-        try {
-            mProcess.getOutputStream().flush();
-            mProcess.getOutputStream().close();
-        } catch (IOException ex) {
-            //just in case the stream is already closed...
+        if (mProcess != null) {
+            try {
+                mProcess.getOutputStream().write("q\n".getBytes());
+                mProcess.getOutputStream().flush();
+                mProcess.getOutputStream().close();
+            } catch (IOException ex) {
+                //just in case the stream is already closed...
+            }
+            mProcess.destroy();
+            mProcess.destroyForcibly();
+            mProcess = null;
         }
-        mProcess.destroy();
-        mProcess.destroyForcibly();
-        mProcess = null;
     }
 
     public static boolean isOSX() {
