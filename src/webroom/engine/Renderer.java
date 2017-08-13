@@ -257,13 +257,13 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         this.requestFocus();
         if (evt.getClickCount() == 2) {
             String loc = "#ACTION=" + (int) camera.yPos + "," + (int) camera.xPos;
-            listener.status(loc);
+            listener.status(Message.Type.ACTION,loc);
         }
     }//GEN-LAST:event_formMouseClicked
 
     private void formFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_formFocusGained
         if (listener != null) {
-            listener.status("#CLOSEMEDIA");
+            listener.status(Message.Type.CLOSEMEDIA,"#CLOSEMEDIA");
         }
     }//GEN-LAST:event_formFocusGained
 

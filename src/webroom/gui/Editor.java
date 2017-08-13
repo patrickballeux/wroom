@@ -539,7 +539,7 @@ public class Editor extends javax.swing.JDialog implements Message {
     }
 
     @Override
-    public void status(String msg) {
+    public void status(Message.Type type,String msg) {
         txtLogs.append(msg + "\n");
     }
 

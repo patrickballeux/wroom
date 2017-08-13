@@ -42,7 +42,7 @@ public class Camera implements KeyListener {
         if (key.getKeyCode() == KeyEvent.VK_SPACE) {
             // coordinates are reversed...
             String loc = "#ACTION=" + (int) this.yPos + "," + (int) this.xPos;
-            listener.status(loc);
+            listener.status(Message.Type.ACTION,loc);
         }
     }
 

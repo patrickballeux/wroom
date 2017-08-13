@@ -7,7 +7,6 @@ package webroom.engine;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.TreeMap;
@@ -60,13 +59,13 @@ public class RoomFile {
         InputStream in;
         in = new URL(finalURL).openStream();
         byte[] buffer = new byte[65536 * 4];
-        listener.status("Loading map...");
+        listener.status(Message.Type.NOTIFICATION,"Loading map...");
         int count = in.read(buffer);
         content = new String(buffer, 0, count);
         in.close();
         String[] lines = content.split("\n");
         ArrayList<String> mapLines = new ArrayList<>();
-        listener.status("Parsing map...");
+        listener.status(Message.Type.NOTIFICATION,"Parsing map...");
         title = "Undefined...";
         for (String line : lines) {
             System.out.println(line);
@@ -153,7 +152,7 @@ public class RoomFile {
             }
         }
         //convert to map...
-        listener.status("Creating floor...");
+        listener.status(Message.Type.NOTIFICATION,"Creating floor...");
         map = new int[mapLines.size()][mapLines.get(0).split(",").length];
         System.out.println("Map size: " + map.length + "x" + map[0].length);
         for (int y = 0; y < mapLines.size(); y++) {
@@ -162,8 +161,8 @@ public class RoomFile {
                 map[y][x] = new Integer(row[x].trim());
             }
         }
-        listener.status("Welcome to " + title);
-        listener.status("#MESSAGE=Welcome to " + title);
+        listener.status(Message.Type.NOTIFICATION,"Welcome to " + title);
+        listener.status(Message.Type.NOTIFICATION,"#MESSAGE=Welcome to " + title);
     }
 
     public String getChatroom() {

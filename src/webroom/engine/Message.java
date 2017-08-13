@@ -10,5 +10,11 @@ package webroom.engine;
  * @author patri
  */
 public interface Message {
-    public void status(String msg);
+    public enum Type{
+        ACTION,
+        CLOSEMEDIA,
+        TRIGGER,
+        NOTIFICATION   
+    }
+    public void status(Type t,String msg);
 }

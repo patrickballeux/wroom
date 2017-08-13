@@ -593,7 +593,7 @@ public class Browser extends javax.swing.JFrame implements Message {
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void status(String msg) {
+    public void status(Message.Type type,String msg) {
         System.out.println("Message received: " + msg);
         if (msg.startsWith("#")) {
             if (msg.startsWith("#ACTION=")) {
