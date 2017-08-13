@@ -16,6 +16,11 @@
  */
 package webroom.engine;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -25,6 +30,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
@@ -39,15 +45,17 @@ public class SourceFFMpeg {
 
     private Process mProcess;
     private final String mInput;
-    private int mFPS = 15;
+    private final int mFPS = 15;
     private boolean mStopMe = false;
     private final Texture mTexture;
     private ServerSocket videoStream;
     private ServerSocket audioStream;
-    private ArrayList<int[]> videoBuffer = new ArrayList<>();
+    private final ArrayList<int[]> videoBuffer = new ArrayList<>();
     private static final int MAXBUFFERFRAMES = 100;
+    private static BufferedImage iconMediaPlay;
 
     private void renderVideo() throws IOException, InterruptedException {
+        videoBuffer.clear();
         Socket s = videoStream.accept();
         byte[] dataBuffer = new byte[Texture.SIZE * Texture.SIZE * 4];
         DataInputStream din = new DataInputStream(s.getInputStream());
@@ -111,6 +119,21 @@ public class SourceFFMpeg {
     public SourceFFMpeg(Texture t, String input) {
         mInput = input;
         mTexture = t;
+        try {
+            iconMediaPlay = ImageIO.read(getClass().getResource("mediaplay.png"));
+            if (mTexture.image == null) {
+                mTexture.image = new BufferedImage(Texture.SIZE, Texture.SIZE, BufferedImage.TYPE_INT_ARGB);
+            }
+            Graphics2D g = mTexture.image.createGraphics();
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, mTexture.image.getWidth(), mTexture.image.getHeight());
+            g.drawImage(iconMediaPlay.getScaledInstance(Texture.SIZE, Texture.SIZE, Image.SCALE_SMOOTH), 0, 0, null);
+            g.dispose();
+            mTexture.pixels = ((DataBufferInt) mTexture.image.getRaster().getDataBuffer()).getData();
+        } catch (IOException ex) {
+            Logger.getLogger(SourceFFMpeg.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     protected void initStream() throws IOException {
@@ -180,6 +203,12 @@ public class SourceFFMpeg {
     }
 
     protected void disposeStream() throws IOException {
+        Graphics2D g = mTexture.image.createGraphics();
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, mTexture.image.getWidth(), mTexture.image.getHeight());
+        g.drawImage(iconMediaPlay.getScaledInstance(Texture.SIZE, Texture.SIZE, Image.SCALE_SMOOTH), 0, 0, null);
+        g.dispose();
+        mTexture.pixels = ((DataBufferInt) mTexture.image.getRaster().getDataBuffer()).getData();
         mStopMe = true;
         mProcess.getOutputStream().write("q\n".getBytes());
         try {

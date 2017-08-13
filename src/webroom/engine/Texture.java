@@ -115,6 +115,7 @@ public class Texture implements Runnable {
             if (endsWidthVideo.indexOf(ext) >= 0) {
                 //this is a video...
                 ffmpeg = new SourceFFMpeg(this, url.toString());
+                originalImage = image;
             } else {
                 //This is an image
                 try {
@@ -146,13 +147,6 @@ public class Texture implements Runnable {
         g.drawImage(originalImage, 0, 0, null);
         pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
         initLabel(g);
-        if (ffmpeg != null) {
-//            try {
-//                ffmpeg.initStream();
-//            } catch (IOException ex) {
-//                Logger.getLogger(Texture.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-        }
         mIsReady = true;
         if (animated.length > 0) {
             int index = 0;
