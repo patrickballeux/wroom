@@ -168,7 +168,8 @@ public class SourceFFMpeg {
                 }
             }
         }).start();
-        String command = "libs/ffmpeg.exe  -v 0 -i " + mInput + " " + "-s " + Texture.SIZE + "x" + Texture.SIZE + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
+        String filter = " -filter:v scale=" + Texture.SIZE +":-1,pad="+Texture.SIZE+":"+ Texture.SIZE +":(ow-iw)/2:(oh-ih)/2 "; 
+        String command = "libs/ffmpeg.exe  -v 0 -i " + mInput + " " + filter + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
         if (!isWindows()) {
             if (isOSX()) {
                 command = "libs/ffmpegosx  -v 0 -i " + mInput + " " + "-s " + Texture.SIZE + "x" + Texture.SIZE + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
