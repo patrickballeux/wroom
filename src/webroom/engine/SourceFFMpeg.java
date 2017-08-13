@@ -172,9 +172,9 @@ public class SourceFFMpeg {
         String command = "libs/ffmpeg.exe  -v 0 -i " + mInput + " " + filter + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
         if (!isWindows()) {
             if (isOSX()) {
-                command = "libs/ffmpegosx  -v 0 -i " + mInput + " " + "-s " + Texture.SIZE + "x" + Texture.SIZE + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
+                command = "libs/ffmpegosx  -v 0 -i " + mInput + " " + filter + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
             } else {
-                command = "libs/ffmpeg  -v 0 -i " + mInput + " " + "-s " + Texture.SIZE + "x" + Texture.SIZE + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
+                command = "libs/ffmpeg  -v 0 -i " + mInput + " " + filter + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
             }
         }
         System.out.println(command);
