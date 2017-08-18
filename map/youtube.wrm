@@ -46,7 +46,7 @@ start=1,1
 # action=message,x,y,Message string...
 # Actions are triggered by pressing the action key: space bar...
 
-action=teleport,1,19,http://crombz.com/wroom
+action=teleport,1,19,http://crombz.com/wroom, Back to homebase
 action=sound,1,19,teleport.wav
 
 #action=download,6,6,http://crombz.com/wroom/floor.jpg

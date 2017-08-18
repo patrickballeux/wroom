@@ -40,10 +40,12 @@ start=1,1
 # action=sound,x,y,sound.wav
 # action=message,x,y,Message string...
 # Actions are triggered by pressing the action key: space bar...
-action=teleport,7,7,http://crombz.com/wroom/smallroom.wrm
+action=teleport,7,7,http://wroom.crombz.com/smallroom.wrm,A small room...
 action=sound,7,7,teleport.wav
-action=teleport,5,7,http://crombz.com/wroom/youtube.wrm
+action=teleport,5,7,http://wroom.crombz.com/youtube.wrm,My Favorite Covers: Frog Leap Studio
 action=sound,5,7,teleport.wav
+action=teleport,3,7,http://wroom.crombz.com/mars/map.wrm,Planet Mars: Find the exit!
+action=sound,3,7,teleport.wav
 action=door,10,3,11x3
 action=door,12,3,11x3
 

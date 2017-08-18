@@ -14,4 +14,5 @@ import java.net.URL;
 public class Teleport {
     public URL base;
     public Texture tile;
+    public String title = "Teleport";
 }

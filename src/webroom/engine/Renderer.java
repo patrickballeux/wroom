@@ -83,7 +83,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             double y = Integer.parseInt(key.split(",")[1]);
             x += 0.5;
             y += 0.5;
-            s.texture = new Texture(teleporticon, "<div style='text-align:center;font-size:8px;color:white;background-color:#111111;'>" + teleports.get(key).base.toString() + "</div>", 0);
+            s.texture = new Texture(teleporticon, "<div style='text-align:center;font-size:12px;color:#111111;border: 2px solid #111111;background-color:WHITE;'>" + teleports.get(key).title + "</div>", 0);
             s.x = x;
             s.y = y;
             s.distance = 0;

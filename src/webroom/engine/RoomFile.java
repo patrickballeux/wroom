@@ -113,6 +113,11 @@ public class RoomFile {
                         Teleport t = new Teleport();
                         t.base = new URL(action[3].trim());
                         teleports.put(action[1] + "," + action[2], t);
+                        if (action.length == 5){
+                            t.title = action[4];
+                        } else {
+                            t.title = t.base.toString();
+                        }
                         break;
                     case "sound":
                         sounds.put(action[1] + "," + action[2], new URL(base.toString() + "/" + action[3].trim()));
