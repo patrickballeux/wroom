@@ -223,9 +223,7 @@ public class WebPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_btnOpenInBrowserActionPerformed
 
     private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
-        
-        listener.status(Message.Type.CLOSEMEDIA,"#CLOSEMEDIA");
-        
+        listener.onCloseView(this);        
     }//GEN-LAST:event_btnCloseActionPerformed
 
 

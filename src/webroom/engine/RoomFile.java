@@ -28,7 +28,6 @@ public class RoomFile {
     private String title;
     private URL backgroundSound = null;
     private TreeMap<String, String> notification = new TreeMap<>();
-    private ArrayList<String> quotes = new ArrayList<>();
     private TreeMap<String, URL> downloads = new TreeMap<>();
     private TreeMap<String, URL> medias = new TreeMap<>();
     private TreeMap<String, String> texts = new TreeMap<>();
@@ -59,13 +58,13 @@ public class RoomFile {
         InputStream in;
         in = new URL(finalURL).openStream();
         byte[] buffer = new byte[65536 * 4];
-        listener.status(Message.Type.NOTIFICATION,"Loading map...");
+        listener.OnNotification(0,0,"Loading map...");
         int count = in.read(buffer);
         content = new String(buffer, 0, count);
         in.close();
         String[] lines = content.split("\n");
         ArrayList<String> mapLines = new ArrayList<>();
-        listener.status(Message.Type.NOTIFICATION,"Parsing map...");
+        listener.OnNotification(0,0,"Parsing map...");
         title = "Undefined...";
         for (String line : lines) {
             System.out.println(line);
@@ -139,8 +138,6 @@ public class RoomFile {
                 }
             } else if (line.trim().toLowerCase().startsWith("backgroundsound=")) {
                 backgroundSound = new URL(base.toString() + "/" + line.split("=")[1]);
-            } else if (line.trim().toLowerCase().startsWith("quote=")) {
-                quotes.add(line.split("=")[1]);
             } else if (line.trim().toLowerCase().startsWith("text=")) {
                 String text[] = line.replaceFirst("text=", "").split(",");
                 texts.put(text[0] + "," + text[1], text[2]);
@@ -152,7 +149,7 @@ public class RoomFile {
             }
         }
         //convert to map...
-        listener.status(Message.Type.NOTIFICATION,"Creating floor...");
+        listener.OnNotification(0,0,"Creating floor...");
         map = new int[mapLines.size()][mapLines.get(0).split(",").length];
         System.out.println("Map size: " + map.length + "x" + map[0].length);
         for (int y = 0; y < mapLines.size(); y++) {
@@ -161,8 +158,7 @@ public class RoomFile {
                 map[y][x] = new Integer(row[x].trim());
             }
         }
-        listener.status(Message.Type.NOTIFICATION,"Welcome to " + title);
-        listener.status(Message.Type.NOTIFICATION,"#MESSAGE=Welcome to " + title);
+        listener.OnNotification(0,0,"Welcome to " + title);
     }
 
     public String getChatroom() {
@@ -219,10 +215,6 @@ public class RoomFile {
 
     public TreeMap<String, Teleport> getTeleports() {
         return teleports;
-    }
-
-    public ArrayList<String> getQuotes() {
-        return quotes;
     }
 
     public URL getBackgroundSound() {

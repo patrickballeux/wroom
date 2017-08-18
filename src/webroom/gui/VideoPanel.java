@@ -110,7 +110,7 @@ public class VideoPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_formComponentResized
 
     private void btnClosedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClosedActionPerformed
-       listener.status(Message.Type.CLOSEMEDIA,"#CLOSEMEDIA");
+       listener.onCloseView(this);
     }//GEN-LAST:event_btnClosedActionPerformed
 
 

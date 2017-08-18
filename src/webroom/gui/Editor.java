@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -538,10 +539,6 @@ public class Editor extends javax.swing.JDialog implements Message {
         });
     }
 
-    @Override
-    public void status(Message.Type type,String msg) {
-        txtLogs.append(msg + "\n");
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddTexture;
@@ -580,4 +577,29 @@ public class Editor extends javax.swing.JDialog implements Message {
     private javax.swing.JTextField txtMapX;
     private javax.swing.JTextField txtMapY;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void OnAction(int x, int y) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void OnTrigger(int x, int y) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void OnNotification(int x, int y, String msg) {
+        txtLogs.append(msg + "\n");
+    }
+
+    @Override
+    public void OnError(int x, int y, String error) {
+        txtLogs.append(error + "\n");
+    }
+
+    @Override
+    public void onCloseView(JComponent comp) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

@@ -27,6 +27,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import org.schwering.irc.lib.IRCConfig;
@@ -54,13 +55,10 @@ public class Browser extends javax.swing.JFrame implements Message {
     private TreeMap<String, URL> sounds = null;
     private TreeMap<String, String> notifications = null;
     private Clip backgroundSound = null;
-    private ArrayList<String> quotes = null;
     private boolean reloadingRoom = false;
     private TreeMap<String, URL> downloads;
     private RendererStatus rendStatus;
     private TreeMap<String, URL> medias;
-    private VideoPanel media;
-    private WebPanel web;
     private TreeMap<String, URL> webpages;
     private TreeMap<String, String> embeded;
     private java.util.prefs.Preferences preferences;
@@ -236,7 +234,6 @@ public class Browser extends javax.swing.JFrame implements Message {
                         if (s.id.equals(user.getNick())) {
                             s.x = x;
                             s.y = y;
-                            System.out.println("Moving user " + user.getNick());
                             break;
                         }
                     }
@@ -248,7 +245,6 @@ public class Browser extends javax.swing.JFrame implements Message {
                             break;
                         }
                     }
-
                     lstUsers.setSelectedValue(user.toString(), true);
                 }
             }
@@ -283,6 +279,14 @@ public class Browser extends javax.swing.JFrame implements Message {
         mnuEditSetHomepage = new javax.swing.JMenuItem();
         mnuEditGoToHomepage = new javax.swing.JMenuItem();
         mnuEditSetNickName = new javax.swing.JMenuItem();
+        mnuControl = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        jMenuItem4 = new javax.swing.JMenuItem();
+        jMenuItem5 = new javax.swing.JMenuItem();
+        jMenuItem6 = new javax.swing.JMenuItem();
+        jMenuItem7 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("WRoom");
@@ -303,11 +307,6 @@ public class Browser extends javax.swing.JFrame implements Message {
         lblMessage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblMessage.setText("Welcome to WRoom");
 
-        txtChat.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtChatActionPerformed(evt);
-            }
-        });
         txtChat.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtChatKeyPressed(evt);
@@ -442,6 +441,31 @@ public class Browser extends javax.swing.JFrame implements Message {
 
         mainMenu.add(mnuEdit);
 
+        mnuControl.setText("Control");
+
+        jMenuItem1.setText("Move Foward - UP/W");
+        mnuControl.add(jMenuItem1);
+
+        jMenuItem2.setText("Move Bacward: DOWN/S");
+        mnuControl.add(jMenuItem2);
+
+        jMenuItem3.setText("Move Left: LEFT/A");
+        mnuControl.add(jMenuItem3);
+
+        jMenuItem4.setText("Move Right: RIGHT/D");
+        mnuControl.add(jMenuItem4);
+
+        jMenuItem5.setText("Run: SHIFT + Fowward/Backward");
+        mnuControl.add(jMenuItem5);
+
+        jMenuItem6.setText("Strafe: CTRL + Left/Right");
+        mnuControl.add(jMenuItem6);
+
+        jMenuItem7.setText("Action: SPACE/Mouse Double-click");
+        mnuControl.add(jMenuItem7);
+
+        mainMenu.add(mnuControl);
+
         setJMenuBar(mainMenu);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -531,17 +555,12 @@ public class Browser extends javax.swing.JFrame implements Message {
         cboURLs.setSelectedIndex(0);
     }//GEN-LAST:event_mnuEditGoToHomepageActionPerformed
 
-    private void txtChatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtChatActionPerformed
-
-    }//GEN-LAST:event_txtChatActionPerformed
-
     private void txtChatKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtChatKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             if (irc != null && irc.isConnected()) {
                 String msg = txtChat.getText();
                 if (!msg.startsWith("/")) {
                     irc.doPrivmsg(chatroom, msg);
-                    irc.doPrivmsg(chatroom, "MOVING TO:" + renderer.getCamera().xPos + "x" + renderer.getCamera().yPos);
                     renderer.addMessage("Me>" + msg);
                 }
                 txtChat.setText("");
@@ -575,10 +594,18 @@ public class Browser extends javax.swing.JFrame implements Message {
     private javax.swing.JButton btnURLGo;
     private javax.swing.JComboBox<String> cboURLs;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JMenuItem jMenuItem5;
+    private javax.swing.JMenuItem jMenuItem6;
+    private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JLabel lblMessage;
     private javax.swing.JLabel lblURL;
     private javax.swing.JList<String> lstUsers;
     private javax.swing.JMenuBar mainMenu;
+    private javax.swing.JMenu mnuControl;
     private javax.swing.JMenu mnuEdit;
     private javax.swing.JMenuItem mnuEditGoToHomepage;
     private javax.swing.JMenuItem mnuEditSetHomepage;
@@ -592,236 +619,6 @@ public class Browser extends javax.swing.JFrame implements Message {
     private javax.swing.JTextField txtChat;
     // End of variables declaration//GEN-END:variables
 
-    @Override
-    public void status(Message.Type type,String msg) {
-        System.out.println("Message received: " + msg);
-        if (msg.startsWith("#")) {
-            if (msg.startsWith("#ACTION=")) {
-                String loc = msg.split("=")[1].trim();
-                //Check around is a texture is media playable...
-                int x = Integer.parseInt(loc.split(",")[0]);
-                int y = Integer.parseInt(loc.split(",")[1]);
-                Texture mediaTexture = null;
-                for (int i = x - 1; i <= x + 1; i++) {
-                    for (int j = y - 1; j <= y + 1; j++) {
-                        if (renderer.getMap()[j][i] > 0) {
-                            Texture t = renderer.getTextures().get(renderer.getMap()[j][i] - 1);
-                            System.out.println("testing texture " + renderer.getMap()[j][i]);
-                            if (t.hasMedia()) {
-                                mediaTexture = t;
-                                System.out.println("Texture has media");
-                                break;
-                            }
-                        }
-                    }
-                    if (mediaTexture != null) {
-                        break;
-                    }
-                }
-                if (mediaTexture != null) {
-                    if (mediaTexture.isMediaPlaying()) {
-                        mediaTexture.stopMedia();
-                    } else {
-                        mediaTexture.playMedia();
-                    }
-                }
-                if (sounds.containsKey(loc)) {
-                    playSound(sounds.get(loc));
-                }
-                if (teleports.containsKey(loc)) {
-                    cboURLs.removeItem(teleports.get(loc).base.toString());
-                    cboURLs.insertItemAt(teleports.get(loc).base.toString(), 0);
-                    cboURLs.setSelectedIndex(0);
-                    btnURLGo.doClick();
-                }
-                if (notifications.containsKey(loc)) {
-                    if (renderer != null) {
-                        renderer.addMessage(notifications.get(loc));
-                    }
-                }
-                if (downloads.containsKey(loc)) {
-                    try {
-                        URL dl = downloads.get(loc);
-                        downloadFile(dl);
-                    } catch (IOException ex) {
-                        Logger.getLogger(Browser.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-                if (medias.containsKey(loc)) {
-                    if (media == null) {
-                        try {
-                            if (backgroundSound != null) {
-                                backgroundSound.stop();
-                            }
-                        } catch (Exception ex) {
-                        }
-                        media = new VideoPanel(medias.get(loc), this, new Rectangle(getWidth(), getHeight() * 2 / 3));
-                        panViewer.remove(renderer);
-                        if (irc != null && irc.isConnected()) {
-                            irc.doAway("Watching video " + medias.get(loc));
-                        }
-                        panViewer.add(media, BorderLayout.CENTER);
-                        media.setSize(getWidth(), getHeight() * 2 / 3);
-                        media.setVisible(true);
-                        media.requestFocus();
-                    } else {
-                        media.stop();
-                        panViewer.remove(media);
-                        panViewer.add(renderer, BorderLayout.CENTER);
-                        if (irc != null && irc.isConnected()) {
-                            irc.doAway();
-                        }
-                        renderer.requestFocus();
-                        media = null;
-                        try {
-                            if (backgroundSound != null) {
-                                backgroundSound.start();
-                                backgroundSound.loop(Clip.LOOP_CONTINUOUSLY);
-                            }
-                        } catch (Exception ex) {
-                        }
-                    }
-                    panViewer.updateUI();
-                }
-                if (webpages.containsKey(loc)) {
-                    if (web == null) {
-                        try {
-                            if (backgroundSound != null) {
-                                backgroundSound.stop();
-                            }
-                        } catch (Exception ex) {
-                        }
-                        web = new WebPanel(webpages.get(loc), this, getBounds());
-                        panViewer.remove(renderer);
-                        if (irc != null && irc.isConnected()) {
-                            irc.doAway("Browsing web at " + webpages.get(loc));
-                        }
-                        panViewer.add(web, BorderLayout.CENTER);
-                        web.setSize(getWidth(), getHeight() * 2 / 3);
-                        web.setVisible(true);
-                        web.requestFocus();
-                    } else {
-                        web.stop();
-                        panViewer.remove(web);
-                        panViewer.add(renderer, BorderLayout.CENTER);
-                        if (irc != null && irc.isConnected()) {
-                            irc.doAway();
-                        }
-                        renderer.requestFocus();
-                        web = null;
-                        try {
-                            if (backgroundSound != null) {
-                                backgroundSound.start();
-                                backgroundSound.loop(Clip.LOOP_CONTINUOUSLY);
-                            }
-                        } catch (Exception ex) {
-                        }
-                    }
-                }
-                if (embeded.containsKey(loc)) {
-                    System.out.println("receiving embeded");
-                    if (web == null) {
-                        try {
-                            if (backgroundSound != null) {
-                                backgroundSound.stop();
-                            }
-                        } catch (Exception ex) {
-                        }
-                        web = new WebPanel(embeded.get(loc), this, getBounds());
-                        if (irc != null && irc.isConnected()) {
-                            irc.doAway("Watching video online: " + webpages.get(loc));
-                        }
-                        panViewer.remove(renderer);
-                        panViewer.add(web, BorderLayout.CENTER);
-                        web.setSize(getWidth(), getHeight() * 2 / 3);
-                        web.setVisible(true);
-                        web.requestFocus();
-                    } else {
-                        web.stop();
-                        panViewer.remove(web);
-                        panViewer.add(renderer, BorderLayout.CENTER);
-                        if (irc != null && irc.isConnected()) {
-                            irc.doAway();
-                        }
-                        renderer.requestFocus();
-                        web = null;
-                        try {
-                            if (backgroundSound != null) {
-                                backgroundSound.start();
-                                backgroundSound.loop(Clip.LOOP_CONTINUOUSLY);
-                            }
-                        } catch (Exception ex) {
-                        }
-                    }
-                    panViewer.updateUI();
-                }
-                if (doors.containsKey(loc)) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String door = doors.get(loc).trim();
-                            System.out.println("Opening door at " + door);
-                            int x = Integer.parseInt(door.split("x")[0]);
-                            int y = Integer.parseInt(door.split("x")[1]);
-                            int oldTexture = renderer.getMap()[y][x];
-                            System.out.println("old texture: " + oldTexture);
-                            Texture t = renderer.getTextures().get(oldTexture - 1);
-                            //Find to affect texture...
-                            try {
-                                renderer.getMap()[y][x] = 0;
-                                Thread.sleep(2000);
-                                while (x == (int) renderer.getCamera().yPos && y == (int) renderer.getCamera().xPos) {
-                                    Thread.sleep(500);
-                                }
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(Browser.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                            renderer.getMap()[y][x] = oldTexture;
-                            System.out.println("Closing door...");
-                        }
-                    }).start();
-                }
-
-            } else if (msg.equals("#CLOSEMEDIA")) {
-                try {
-                    if (media != null) {
-                        media.stop();
-                        panViewer.remove(media);
-                        panViewer.add(renderer, BorderLayout.CENTER);
-                        if (irc != null && irc.isConnected()) {
-                            irc.doAway();
-                        }
-                        renderer.requestFocus();
-                        media = null;
-                        if (backgroundSound != null) {
-                            backgroundSound.start();
-                            backgroundSound.loop(Clip.LOOP_CONTINUOUSLY);
-                        }
-                    }
-                    if (web != null) {
-                        web.stop();
-                        panViewer.remove(web);
-                        panViewer.add(renderer, BorderLayout.CENTER);
-                        if (irc != null && irc.isConnected()) {
-                            irc.doAway();
-                        }
-                        renderer.requestFocus();
-                        web = null;
-                        if (backgroundSound != null) {
-                            backgroundSound.start();
-                            backgroundSound.loop(Clip.LOOP_CONTINUOUSLY);
-                        }
-                    }
-                } catch (Exception ex) {
-                }
-                panViewer.updateUI();
-            }
-        } else {
-            lblMessage.setText(msg);
-            rendStatus.updateStatus(msg);
-        }
-
-    }
     private boolean isAlreadyLoading = false;
 
     private void loadRoom(URL url) {
@@ -870,7 +667,6 @@ public class Browser extends javax.swing.JFrame implements Message {
 
                         rendStatus.updateStatus("Loading sounds...");
                         sounds = f.getSounds();
-                        quotes = f.getQuotes();
                         medias = f.getMedias();
                         doors = f.getDoors();
                         webpages = f.getWebPages();
@@ -881,7 +677,7 @@ public class Browser extends javax.swing.JFrame implements Message {
                         panViewer.remove(rendStatus);
                         panViewer.add(renderer, BorderLayout.CENTER);
                         renderer.start();
-                        renderer.addMessage("Welcome to " + f.getTitle() + "...");
+                        renderer.addMessage("Welcome to " + f.getTitle());
                         if (backgroundSound != null) {
                             backgroundSound.stop();
                             backgroundSound.close();
@@ -903,26 +699,11 @@ public class Browser extends javax.swing.JFrame implements Message {
                                 }
                             }
                         }).start();
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                while (true) {
-                                    if (quotes.size() > 0) {
-                                        String q = quotes.get(new Random().nextInt(quotes.size() - 1));
-                                        renderer.addMessage(q);
-                                    }
-                                    try {
-                                        Thread.sleep(15000);
-                                    } catch (InterruptedException ex) {
-                                        Logger.getLogger(Browser.class.getName()).log(Level.SEVERE, null, ex);
-                                    }
-                                }
-                            }
-                        }).start();
                         if (panViewer != null) {
                             panViewer.updateUI();
                         }
                         repaint();
+                        lblMessage.setText("Welcome to " + f.getTitle());
                     } catch (Exception ex) {
                         rendStatus.updateStatus("Could not load WRoom... " + ex.getMessage());
                         ex.printStackTrace();
@@ -987,5 +768,186 @@ public class Browser extends javax.swing.JFrame implements Message {
                 }
             }
         }).start();
+    }
+
+    @Override
+    public void OnAction(int x, int y) {
+        String loc = x + "," + y;
+        Texture mediaTexture = null;
+        for (int i = x - 1; i <= x + 1; i++) {
+            for (int j = y - 1; j <= y + 1; j++) {
+                if (renderer.getMap()[j][i] > 0) {
+                    Texture t = renderer.getTextures().get(renderer.getMap()[j][i] - 1);
+                    System.out.println("testing texture " + renderer.getMap()[j][i]);
+                    if (t.hasMedia()) {
+                        mediaTexture = t;
+                        System.out.println("Texture has media");
+                        break;
+                    }
+                }
+            }
+            if (mediaTexture != null) {
+                break;
+            }
+        }
+        if (mediaTexture != null) {
+            if (mediaTexture.isMediaPlaying()) {
+                mediaTexture.stopMedia();
+            } else {
+                mediaTexture.playMedia();
+            }
+        }
+        if (sounds.containsKey(loc)) {
+            playSound(sounds.get(loc));
+        }
+        if (teleports.containsKey(loc)) {
+            cboURLs.removeItem(teleports.get(loc).base.toString());
+            cboURLs.insertItemAt(teleports.get(loc).base.toString(), 0);
+            cboURLs.setSelectedIndex(0);
+            btnURLGo.doClick();
+        }
+        if (notifications.containsKey(loc)) {
+            if (renderer != null) {
+                renderer.addMessage(notifications.get(loc));
+            }
+        }
+        if (downloads.containsKey(loc)) {
+            try {
+                URL dl = downloads.get(loc);
+                downloadFile(dl);
+            } catch (IOException ex) {
+                Logger.getLogger(Browser.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        if (medias.containsKey(loc)) {
+            try {
+                if (backgroundSound != null) {
+                    backgroundSound.stop();
+                }
+            } catch (Exception ex) {
+            }
+            VideoPanel media = new VideoPanel(medias.get(loc), this, new Rectangle(getWidth(), getHeight() * 2 / 3));
+            panViewer.remove(renderer);
+            if (irc != null && irc.isConnected()) {
+                irc.doAway("Watching video " + medias.get(loc));
+            }
+            panViewer.add(media, BorderLayout.CENTER);
+            media.setSize(getWidth(), getHeight() * 2 / 3);
+            media.setVisible(true);
+            media.requestFocus();
+            panViewer.updateUI();
+        }
+        if (webpages.containsKey(loc)) {
+            try {
+                if (backgroundSound != null) {
+                    backgroundSound.stop();
+                }
+            } catch (Exception ex) {
+            }
+            WebPanel web = new WebPanel(webpages.get(loc), this, getBounds());
+            panViewer.remove(renderer);
+            if (irc != null && irc.isConnected()) {
+                irc.doAway("Browsing web at " + webpages.get(loc));
+            }
+            panViewer.add(web, BorderLayout.CENTER);
+            web.setSize(getWidth(), getHeight() * 2 / 3);
+            web.setVisible(true);
+            web.requestFocus();
+        }
+        if (embeded.containsKey(loc)) {
+            try {
+                if (backgroundSound != null) {
+                    backgroundSound.stop();
+                }
+            } catch (Exception ex) {
+            }
+            WebPanel web = new WebPanel(embeded.get(loc), this, getBounds());
+            if (irc != null && irc.isConnected()) {
+                irc.doAway("Watching video online: " + webpages.get(loc));
+            }
+            panViewer.remove(renderer);
+            panViewer.add(web, BorderLayout.CENTER);
+            web.setSize(getWidth(), getHeight() * 2 / 3);
+            web.setVisible(true);
+            web.requestFocus();
+            panViewer.updateUI();
+        }
+        if (doors.containsKey(loc)) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    String door = doors.get(loc).trim();
+                    System.out.println("Opening door at " + door);
+                    int x = Integer.parseInt(door.split("x")[0]);
+                    int y = Integer.parseInt(door.split("x")[1]);
+                    int oldTexture = renderer.getMap()[y][x];
+                    System.out.println("old texture: " + oldTexture);
+                    Texture t = renderer.getTextures().get(oldTexture - 1);
+                    //Find to affect texture...
+                    try {
+                        renderer.getMap()[y][x] = 0;
+                        Thread.sleep(2000);
+                        while (x == (int) renderer.getCamera().yPos && y == (int) renderer.getCamera().xPos) {
+                            Thread.sleep(500);
+                        }
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Browser.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    renderer.getMap()[y][x] = oldTexture;
+                    System.out.println("Closing door...");
+                }
+            }).start();
+        }
+    }
+
+    @Override
+    public void OnTrigger(int x, int y) {
+        if (irc != null && irc.isConnected()) {
+            irc.doPrivmsg(chatroom, "MOVING TO:" + x + "x" + y);
+        }
+    }
+
+    @Override
+    public void OnNotification(int x, int y, String msg) {
+        rendStatus.updateStatus(msg);
+    }
+
+    @Override
+    public void OnError(int x, int y, String error) {
+    }
+
+    @Override
+    public void onCloseView(JComponent comp) {
+        try {
+            if (comp instanceof VideoPanel) {
+                VideoPanel media = (VideoPanel) comp;
+                media.stop();
+                panViewer.remove(media);
+                panViewer.add(renderer, BorderLayout.CENTER);
+                if (irc != null && irc.isConnected()) {
+                    irc.doAway();
+                }
+                renderer.requestFocus();
+                if (backgroundSound != null) {
+                    backgroundSound.start();
+                    backgroundSound.loop(Clip.LOOP_CONTINUOUSLY);
+                }
+            } else if (comp instanceof WebPanel) {
+                WebPanel web = (WebPanel) comp;
+                web.stop();
+                panViewer.remove(web);
+                panViewer.add(renderer, BorderLayout.CENTER);
+                if (irc != null && irc.isConnected()) {
+                    irc.doAway();
+                }
+                renderer.requestFocus();
+                if (backgroundSound != null) {
+                    backgroundSound.start();
+                    backgroundSound.loop(Clip.LOOP_CONTINUOUSLY);
+                }
+            }
+        } catch (Exception ex) {
+        }
+        panViewer.updateUI();
     }
 }

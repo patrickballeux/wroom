@@ -47,7 +47,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
      * Creates new form Renderer
      *
      */
-    public Renderer(RoomFile file, Message listener,ArrayList<Sprite>userSprites) {
+    public Renderer(RoomFile file, Message listener, ArrayList<Sprite> userSprites) {
         initComponents();
         this.userSprites = userSprites;
         textures = file.getTextures();
@@ -118,8 +118,12 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             textures.add(new Texture(texture, "<center>Door</center>", 0));
             map[y][x] = textures.size();
         }
-        camera = new Camera(startX, startY, 1, 0, 0, -.66, listener, getBounds());
-        screen = new Screen(map, textures, getWidth() - STEPHEIGHT, getHeight() - STEPHEIGHT, floor, ceiling, sprites,userSprites);
+        camera = new Camera(startX, startY, 1, 0, 0, -.66, listener);
+        //forcing 800x600
+        //screen = new Screen(map, textures, getWidth() - STEPHEIGHT, getHeight() - STEPHEIGHT, floor, ceiling, sprites,userSprites);
+        image = new BufferedImage(800, 600, BufferedImage.TYPE_INT_ARGB);
+        pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+        screen = new Screen(map, textures, image.getWidth(), image.getHeight(), floor, ceiling, sprites, userSprites);
         thread = new Thread(this);
         addKeyListener(camera);
         this.setOpaque(true);
@@ -166,6 +170,9 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         }
     }
 
+    private long lastFPSCount = System.currentTimeMillis();
+    private long imageCountFPS = 0;
+    private long fps = 0;
     public void paint(Graphics g) {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
@@ -187,9 +194,19 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             deltaSteps = 0;
             deltaStepsDir = 1;
         }
-        g.drawImage(image, 0, 0 + deltaSteps, this);
+        //g.drawImage(image, 0, 0 + deltaSteps, this);
+        int h = getHeight();
+        int w = (h * image.getWidth()) / image.getHeight();
+        if (w > getWidth()){
+            w = getWidth();
+            h = w * image.getHeight() / image.getWidth();
+        }
+        int x = (getWidth() - w) / 2;
+        int y = ((getHeight() - h) / 2) + deltaSteps;
+        //g.drawImage(image, x, y, w, h, 0, 0, image.getWidth(), image.getHeight(), null);
+        g.drawImage(image.getScaledInstance(w, h, java.awt.Image.SCALE_FAST), x, y, null);        
         g.setFont(new Font("Monospaced", Font.BOLD, 16));
-        int y = 20;
+        y = 20;
         for (int i = 0; i < userMessages.size(); i++) {
             String m = userMessages.get(i);
             g.setColor(Color.BLACK);
@@ -201,6 +218,17 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         g.setColor(Color.BLACK);
         ((Graphics2D) g).setStroke(lineWidth);
         g.drawRect(0, 0, getWidth(), getHeight());
+        imageCountFPS++;
+        if (System.currentTimeMillis() - lastFPSCount >= 1000){
+            fps = imageCountFPS;
+            imageCountFPS = 0;
+            lastFPSCount = System.currentTimeMillis();
+            //adjust camera speed
+            camera.MOVE_SPEED = 2D / fps;
+            camera.ROTATION_SPEED = 2D / fps;
+        }
+        g.setColor(Color.gray);
+        g.drawString("FPS: " + fps, 2, h -5);
     }
 
     /**
@@ -219,11 +247,6 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             }
             public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
                 formAncestorRemoved(evt);
-            }
-        });
-        addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                formFocusGained(evt);
             }
         });
         addMouseListener(new java.awt.event.MouseAdapter() {
@@ -256,27 +279,20 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
     private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
         this.requestFocus();
         if (evt.getClickCount() == 2) {
-            String loc = "#ACTION=" + (int) camera.yPos + "," + (int) camera.xPos;
-            listener.status(Message.Type.ACTION,loc);
+            listener.OnAction((int) camera.yPos, (int) camera.xPos);
         }
     }//GEN-LAST:event_formMouseClicked
 
-    private void formFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_formFocusGained
-        if (listener != null) {
-            listener.status(Message.Type.CLOSEMEDIA,"#CLOSEMEDIA");
-        }
-    }//GEN-LAST:event_formFocusGained
-
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
-        if (getWidth() > 0 && (image == null || image.getWidth() != getWidth())) {
-            //we need to keep a 4/3 ratio
-            int w = getWidth() / 2 * 2;
-            int h = getHeight() / 2 * 2;
-            image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-            pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-            screen = new Screen(map, textures, image.getWidth(), image.getHeight(), floor, ceiling, sprites,userSprites);
-            camera.setSize(getBounds());
-        }
+//        if (getWidth() > 0 && (image == null || image.getWidth() != getWidth())) {
+//            //we need to keep a 4/3 ratio
+//            int w = getWidth() / 2 * 2;
+//            int h = getHeight() / 2 * 2;
+//            image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+//            pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+//            screen = new Screen(map, textures, image.getWidth(), image.getHeight(), floor, ceiling, sprites,userSprites);
+//            camera.setSize(getBounds());
+//        }
 
     }//GEN-LAST:event_formComponentResized
 

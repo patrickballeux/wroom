@@ -5,16 +5,16 @@
  */
 package webroom.engine;
 
+import javax.swing.JComponent;
+
 /**
  *
  * @author patri
  */
 public interface Message {
-    public enum Type{
-        ACTION,
-        CLOSEMEDIA,
-        TRIGGER,
-        NOTIFICATION   
-    }
-    public void status(Type t,String msg);
+    public void OnAction(int x, int y);
+    public void OnTrigger(int x, int y);
+    public void OnNotification(int x, int y, String msg);
+    public void OnError(int x, int y, String error);
+    public void onCloseView(JComponent comp);
 }
