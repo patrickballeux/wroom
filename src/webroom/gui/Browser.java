@@ -276,6 +276,7 @@ public class Browser extends javax.swing.JFrame implements Message {
         mnuEditSetHomepage = new javax.swing.JMenuItem();
         mnuEditGoToHomepage = new javax.swing.JMenuItem();
         mnuEditSetNickName = new javax.swing.JMenuItem();
+        mnuCkkEnabledHQ = new javax.swing.JCheckBoxMenuItem();
         mnuControl = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
@@ -436,6 +437,15 @@ public class Browser extends javax.swing.JFrame implements Message {
         });
         mnuEdit.add(mnuEditSetNickName);
 
+        mnuCkkEnabledHQ.setSelected(true);
+        mnuCkkEnabledHQ.setText("High Quality");
+        mnuCkkEnabledHQ.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuCkkEnabledHQActionPerformed(evt);
+            }
+        });
+        mnuEdit.add(mnuCkkEnabledHQ);
+
         mainMenu.add(mnuEdit);
 
         mnuControl.setText("Control");
@@ -586,6 +596,10 @@ public class Browser extends javax.swing.JFrame implements Message {
         }
     }//GEN-LAST:event_mnuEditSetNickNameActionPerformed
 
+    private void mnuCkkEnabledHQActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCkkEnabledHQActionPerformed
+        renderer.setHighQuality(mnuCkkEnabledHQ.isSelected());
+    }//GEN-LAST:event_mnuCkkEnabledHQActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnURLGo;
@@ -602,6 +616,7 @@ public class Browser extends javax.swing.JFrame implements Message {
     private javax.swing.JLabel lblURL;
     private javax.swing.JList<String> lstUsers;
     private javax.swing.JMenuBar mainMenu;
+    private javax.swing.JCheckBoxMenuItem mnuCkkEnabledHQ;
     private javax.swing.JMenu mnuControl;
     private javax.swing.JMenu mnuEdit;
     private javax.swing.JMenuItem mnuEditGoToHomepage;
@@ -656,6 +671,7 @@ public class Browser extends javax.swing.JFrame implements Message {
                         String id = url.toString().hashCode() + "";
                         userSprites.clear();
                         renderer = new Renderer(f, listener, userSprites);
+                        renderer.setHighQuality(mnuCkkEnabledHQ.isSelected());
                         if (irc == null) {
                             connectToIRC();
                         } else {
