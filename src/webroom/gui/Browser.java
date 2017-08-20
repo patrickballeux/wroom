@@ -6,7 +6,6 @@
 package webroom.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +53,6 @@ public class Browser extends javax.swing.JFrame implements Message {
     private TreeMap<String, URL> sounds = null;
     private TreeMap<String, String> notifications = null;
     private Clip backgroundSound = null;
-    private boolean reloadingRoom = false;
     private TreeMap<String, URL> downloads;
     private RendererStatus rendStatus;
     private TreeMap<String, URL> medias;
@@ -68,7 +66,7 @@ public class Browser extends javax.swing.JFrame implements Message {
     private int chatPort;
     private DefaultListModel<String> userModel;
     private boolean requestingUserList = false;
-    private ArrayList<Sprite> userSprites = new ArrayList<Sprite>();
+    private ArrayList<Sprite> userSprites = new ArrayList<>();
     private Texture userImage;
 
     /**
