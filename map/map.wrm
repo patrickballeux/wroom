@@ -46,8 +46,7 @@ action=teleport,5,7,http://wroom.crombz.com/youtube.wrm,My Favorite Covers: Frog
 action=sound,5,7,teleport.wav
 action=teleport,3,7,http://wroom.crombz.com/mars/map.wrm,Planet Mars: Find the exit!
 action=sound,3,7,teleport.wav
-action=door,10,3,11x3
-action=door,12,3,11x3
+action=door,11,3
 
 #action=download,6,6,http://crombz.com/wroom/floor.jpg
 action=message,6,7,You are near a teleporter...

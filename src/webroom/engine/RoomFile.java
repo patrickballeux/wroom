@@ -108,11 +108,11 @@ public class RoomFile {
                 chatPort = Integer.parseInt(line.split("=")[1].trim());
             } else if (line.trim().toLowerCase().startsWith("action=")) {
                 String[] action = line.substring(line.indexOf("=") + 1).split(",");
-                switch (action[0]) {
+                switch (action[0].trim()) {
                     case "teleport":
                         Teleport t = new Teleport();
                         t.base = new URL(action[3].trim());
-                        teleports.put(action[1] + "," + action[2], t);
+                        teleports.put((action[1] + "," + action[2]).trim(), t);
                         if (action.length == 5){
                             t.title = action[4];
                         } else {
@@ -120,25 +120,26 @@ public class RoomFile {
                         }
                         break;
                     case "sound":
-                        sounds.put(action[1] + "," + action[2], new URL(base.toString() + "/" + action[3].trim()));
+                        sounds.put((action[1] + "," + action[2]).trim(), new URL(base.toString() + "/" + action[3].trim()));
                         break;
                     case "message":
-                        notification.put(action[1] + "," + action[2], action[3]);
+                        notification.put((action[1] + "," + action[2]).trim(), action[3]);
                         break;
                     case "download":
-                        downloads.put(action[1] + "," + action[2], new URL(action[3]));
+                        downloads.put((action[1] + "," + action[2]).trim(), new URL(action[3]));
                         break;
                     case "media":
-                        medias.put(action[1] + "," + action[2], new URL(action[3]));
+                        medias.put((action[1] + "," + action[2]).trim(), new URL(action[3]));
                         break;
                     case "browse":
-                        webpages.put(action[1] + "," + action[2], new URL(action[3]));
+                        webpages.put((action[1] + "," + action[2]).trim(), new URL(action[3]));
                         break;
                     case "embeded":
-                        embeded.put(action[1] + "," + action[2], action[3]);
+                        embeded.put((action[1] + "," + action[2]).trim(), action[3]);
                         break;
                     case "door":
-                        doors.put(action[1] + "," + action[2], action[3]);
+                        doors.put((action[1] + "," + action[2]).trim(), "");
+                        System.out.println("Adding door at " + action[1] + "," + action[2]);
                         break;
                 }
             } else if (line.trim().toLowerCase().startsWith("backgroundsound=")) {

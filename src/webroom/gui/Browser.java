@@ -863,14 +863,13 @@ public class Browser extends javax.swing.JFrame implements Message {
             web.requestFocus();
             panViewer.updateUI();
         }
+        System.out.println("Opening door at " + loc);
         if (doors.containsKey(loc)) {
+            System.out.println("Opening door at " + loc);
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    String door = doors.get(loc).trim();
-                    System.out.println("Opening door at " + door);
-                    int x = Integer.parseInt(door.split("x")[0]);
-                    int y = Integer.parseInt(door.split("x")[1]);
+                    System.out.println("Opening door at " + loc);
                     int oldTexture = renderer.getMap()[y][x];
                     System.out.println("old texture: " + oldTexture);
                     Texture t = renderer.getTextures().get(oldTexture - 1);

@@ -151,9 +151,8 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             }
         }
         for (String key : file.getDoors().keySet()) {
-            String door = file.getDoors().get(key);
-            int x = Integer.parseInt(door.trim().split("x")[0]);
-            int y = Integer.parseInt(door.trim().split("x")[1]);
+            int x = Integer.parseInt(key.trim().split(",")[0]);
+            int y = Integer.parseInt(key.trim().split(",")[1]);
             Texture texture = textures.get(map[y][x] - 1);
             textures.add(new Texture(texture, "<center>Door</center>", 0));
             map[y][x] = textures.size();
