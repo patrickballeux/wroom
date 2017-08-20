@@ -17,7 +17,6 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -774,6 +773,7 @@ public class Browser extends javax.swing.JFrame implements Message {
     public void OnAction(int x, int y) {
         String loc = x + "," + y;
         Texture mediaTexture = null;
+
         for (int i = x - 1; i <= x + 1; i++) {
             for (int j = y - 1; j <= y + 1; j++) {
                 if (renderer.getMap()[j][i] > 0) {
@@ -820,22 +820,22 @@ public class Browser extends javax.swing.JFrame implements Message {
             }
         }
         if (medias.containsKey(loc)) {
-            try {
-                if (backgroundSound != null) {
-                    backgroundSound.stop();
+            //Find the sprite to play the video
+            for (Sprite s : renderer.getSprites()) {
+                System.out.println((int)s.x + "," + (int)s.y);
+                if (x == (int)s.x && y == (int)s.y) {
+                    System.out.println("Current Texture...");
+                    if (s.texture.hasMedia()) {
+                        System.out.println("Texture has media");
+                        if (s.texture.isMediaPlaying()) {
+                            s.texture.stopMedia();
+                        } else {
+                            s.texture.playMedia();
+                        }
+                    }
+                    break;
                 }
-            } catch (Exception ex) {
             }
-            VideoPanel media = new VideoPanel(medias.get(loc), this, new Rectangle(getWidth(), getHeight() * 2 / 3));
-            panViewer.remove(renderer);
-            if (irc != null && irc.isConnected()) {
-                irc.doAway("Watching video " + medias.get(loc));
-            }
-            panViewer.add(media, BorderLayout.CENTER);
-            media.setSize(getWidth(), getHeight() * 2 / 3);
-            media.setVisible(true);
-            media.requestFocus();
-            panViewer.updateUI();
         }
         if (webpages.containsKey(loc)) {
             try {
@@ -901,23 +901,27 @@ public class Browser extends javax.swing.JFrame implements Message {
     }
 
     @Override
-    public void OnTrigger(int x, int y) {
+    public void OnTrigger(int x, int y
+    ) {
         if (irc != null && irc.isConnected()) {
             irc.doPrivmsg(chatroom, "MOVING TO:" + x + "x" + y);
         }
     }
 
     @Override
-    public void OnNotification(int x, int y, String msg) {
+    public void OnNotification(int x, int y, String msg
+    ) {
         rendStatus.updateStatus(msg);
     }
 
     @Override
-    public void OnError(int x, int y, String error) {
+    public void OnError(int x, int y, String error
+    ) {
     }
 
     @Override
-    public void onCloseView(JComponent comp) {
+    public void onCloseView(JComponent comp
+    ) {
         try {
             if (comp instanceof VideoPanel) {
                 VideoPanel media = (VideoPanel) comp;

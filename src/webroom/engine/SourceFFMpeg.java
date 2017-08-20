@@ -52,7 +52,7 @@ public class SourceFFMpeg {
     private ServerSocket audioStream;
     private final ArrayList<int[]> videoBuffer = new ArrayList<>();
     private static final int MAXBUFFERFRAMES = 100;
-    private static BufferedImage iconMediaPlay;
+    private BufferedImage iconMediaPlay;
 
     private void renderVideo() throws IOException, InterruptedException {
         videoBuffer.clear();
@@ -116,11 +116,15 @@ public class SourceFFMpeg {
         source.close();
     }
 
-    public SourceFFMpeg(Texture t, String input) {
+    public SourceFFMpeg(Texture t, String input, boolean isSprite) {
         mInput = input;
         mTexture = t;
         try {
-            iconMediaPlay = ImageIO.read(getClass().getResource("mediaplay.png"));
+            if (isSprite) {
+                iconMediaPlay = ImageIO.read(getClass().getResource("spritemediaplay.png"));
+            } else {
+                iconMediaPlay = ImageIO.read(getClass().getResource("mediaplay.png"));
+            }
             if (mTexture.image == null) {
                 mTexture.image = new BufferedImage(Texture.SIZE, Texture.SIZE, BufferedImage.TYPE_INT_ARGB);
             }

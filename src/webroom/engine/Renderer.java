@@ -83,7 +83,20 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             double y = Integer.parseInt(key.split(",")[1]);
             x += 0.5;
             y += 0.5;
-            s.texture = new Texture(teleporticon, "<div style='text-align:center;font-size:12px;color:#111111;border: 2px solid #111111;background-color:WHITE;'>" + teleports.get(key).title + "</div>", 0);
+            s.texture = new Texture(teleporticon, "<div style='text-align:center;font-size:24px;color:#111111;border: 2px solid #111111;background-color:WHITE;'>" + teleports.get(key).title + "</div>", 0);
+            s.x = x;
+            s.y = y;
+            s.distance = 0;
+            sprites.add(s);
+        }
+        for (String key : file.getMedias().keySet()) {
+            Sprite s = new Sprite();
+            double x = Integer.parseInt(key.split(",")[0]);
+            double y = Integer.parseInt(key.split(",")[1]);
+            x += 0.5;
+            y += 0.5;
+            Texture media = new Texture(file.getMedias().get(key), true);
+            s.texture = media;
             s.x = x;
             s.y = y;
             s.distance = 0;
@@ -121,7 +134,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         camera = new Camera(startX, startY, 1, 0, 0, -.66, listener);
         //forcing 800x600
         //screen = new Screen(map, textures, getWidth() - STEPHEIGHT, getHeight() - STEPHEIGHT, floor, ceiling, sprites,userSprites);
-        image = new BufferedImage(800, 600, BufferedImage.TYPE_INT_ARGB);
+        image = new BufferedImage(Texture.SIZE *4 /3, Texture.SIZE, BufferedImage.TYPE_INT_ARGB);
         pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
         screen = new Screen(map, textures, image.getWidth(), image.getHeight(), floor, ceiling, sprites, userSprites);
         thread = new Thread(this);
@@ -129,7 +142,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         this.setOpaque(true);
         repaint();
         setVisible(true);
-        //setDoubleBuffered(true);
+        setDoubleBuffered(true);
         running = true;
     }
 
@@ -139,6 +152,10 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
 
     public int[][] getMap() {
         return map;
+    }
+
+    public ArrayList<Sprite> getSprites() {
+        return sprites;
     }
 
     public Camera getCamera() {
@@ -173,18 +190,19 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
     private long lastFPSCount = System.currentTimeMillis();
     private long imageCountFPS = 0;
     private long fps = 0;
+
     public void paint(Graphics g) {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
         try {
             screen.update(camera, pixels);
-            camera.update(map);
             if (System.currentTimeMillis() - startTime < 1000) {
                 ((Graphics2D) g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ((System.currentTimeMillis() - startTime) / 1000.0f)));
             }
         } catch (Exception ex) {
             System.err.println("ERROR: " + ex.getMessage());
         }
+        camera.update(map);
         if (camera.back || camera.forward) {
             deltaSteps += deltaStepsDir;
             if (Math.abs(deltaSteps) > STEPHEIGHT) {
@@ -195,16 +213,13 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             deltaStepsDir = 1;
         }
         //g.drawImage(image, 0, 0 + deltaSteps, this);
-        int h = getHeight();
-        int w = (h * image.getWidth()) / image.getHeight();
-        if (w > getWidth()){
-            w = getWidth();
-            h = w * image.getHeight() / image.getWidth();
-        }
+        int w = getWidth();
+        int h = w * image.getHeight() / image.getWidth();
         int x = (getWidth() - w) / 2;
         int y = ((getHeight() - h) / 2) + deltaSteps;
-        //g.drawImage(image, x, y, w, h, 0, 0, image.getWidth(), image.getHeight(), null);
-        g.drawImage(image.getScaledInstance(w, h, java.awt.Image.SCALE_FAST), x, y, null);        
+        //g.drawImage(image,0,0,null);
+        g.drawImage(image, x, y, w+x, h+y, 0, 0, image.getWidth(), image.getHeight(), null);
+        //g.drawImage(image.getScaledInstance(w, h, java.awt.Image.SCALE_FAST), x, y, null);
         g.setFont(new Font("Monospaced", Font.BOLD, 16));
         y = 20;
         for (int i = 0; i < userMessages.size(); i++) {
@@ -219,7 +234,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         ((Graphics2D) g).setStroke(lineWidth);
         g.drawRect(0, 0, getWidth(), getHeight());
         imageCountFPS++;
-        if (System.currentTimeMillis() - lastFPSCount >= 1000){
+        if (System.currentTimeMillis() - lastFPSCount >= 1000) {
             fps = imageCountFPS;
             imageCountFPS = 0;
             lastFPSCount = System.currentTimeMillis();
@@ -228,7 +243,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             camera.ROTATION_SPEED = 2D / fps;
         }
         g.setColor(Color.gray);
-        g.drawString("FPS: " + fps, 2, h -5);
+        g.drawString("FPS: " + fps, 2, getHeight() - 5);
     }
 
     /**
@@ -308,7 +323,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
                 } catch (InterruptedException ex) {
                 }
             }
-            nextPTR = System.currentTimeMillis() + 30;
+            nextPTR = System.currentTimeMillis() + 15;
             try {
                 repaint();
             } catch (Exception ex) {

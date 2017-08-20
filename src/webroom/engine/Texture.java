@@ -16,7 +16,7 @@ import javax.swing.JLabel;
 public class Texture implements Runnable {
 
     public int[] pixels;
-    public static final int SIZE = 256;
+    public static final int SIZE = 512;
     public BufferedImage image;
     public Texture[] animated = new Texture[0];
     private long reloadTime = 0;
@@ -27,6 +27,7 @@ public class Texture implements Runnable {
     JLabel label = null;
     private boolean mIsReady = false;
     private SourceFFMpeg ffmpeg = null;
+    private boolean isSprite = false;
 
     @Override
     public void run() {
@@ -46,6 +47,12 @@ public class Texture implements Runnable {
     }
 
     public Texture(URL file) {
+        this.url = file;
+        new Thread(this).start();
+    }
+
+    public Texture(URL file, boolean isSprite) {
+        this.isSprite = isSprite;
         this.url = file;
         new Thread(this).start();
     }
@@ -82,6 +89,8 @@ public class Texture implements Runnable {
             label.setFont(new Font("Monospaced", Font.BOLD, 24));
             label.setPreferredSize(label.getSize());
             label.setOpaque(false);
+            g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY);
+            g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
             label.paint(g);
             image.getRGB(0, 0, SIZE, SIZE, pixels, 0, SIZE);
         }
@@ -114,14 +123,14 @@ public class Texture implements Runnable {
             ext = ext.substring(ext.length() - 3);
             if (endsWidthVideo.indexOf(ext) >= 0) {
                 //this is a video...
-                ffmpeg = new SourceFFMpeg(this, url.toString());
+                ffmpeg = new SourceFFMpeg(this, url.toString(), isSprite);
                 originalImage = image;
             } else {
                 //This is an image
                 try {
                     BufferedImage temp = ImageIO.read(url);
                     Graphics2D gtemp = originalImage.createGraphics();
-                    gtemp.drawImage(temp.getScaledInstance(SIZE, SIZE, Image.SCALE_SMOOTH), 0, 0, null);
+                    gtemp.drawImage(temp.getScaledInstance(SIZE, SIZE, Image.SCALE_REPLICATE), 0, 0, null);
                     gtemp.dispose();
                 } catch (IOException ex) {
                     Logger.getLogger(Texture.class.getName()).log(Level.SEVERE, null, ex);

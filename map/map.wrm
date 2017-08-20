@@ -78,16 +78,17 @@ action=message,11,5,Opening Vid.me channel...
 
 # Load text to display on walls
 # TEXT=x,7,HTML text entry...  
-#text=8,8,<div  style='height:200px;font-size:16px;border:1px solid black;background-color:#FFFFFF;color:red;'>Teleport to Home base<br>Press SPACE</div>
+#text=8,8,<div  style='height:512px;font-size:16px;border:1px solid black;background-color:#FFFFFF;color:red;'>Teleport to Home base<br>Press SPACE</div>
 text=0,2,<p>Welcome to my WRoom!</p><p style='border:1px solid black;background-color:#FFFFFF;color:red;'>Basic HTML tags are supported...</p>
-text=0,3,<p style='border:1px solid black;background-color:#FFFFFF;color:black;'>The image on the left is showing a live camera feed from Trois-Rivieres, Canada</p>
-text=0,4,<img src='http://www.quebec511.info/Images/Cameras/TroisRivieres/cam/011.jpg?636351486600000000' width=256 />
-text=0,5,<center><img src='http://weather.gc.ca/data/satellite/goes_eusa_1070_100.jpg' width=200 height=200 /></center><div style='text-align:center;font-size:14px;border:1px solid black;background-color:#FFFFFF;color:black;'>Weather map Canada</div>
-text=0,6,<div style='font-size:12px;text-align:center;'>Watch Big Buck Bunny<br>(Press Space!)</div><center><img src='https://peach.blender.org/wp-content/uploads/its-a-trap.png' width=200 height=200 />
+text=0,3,<p style='border:1px solid black;background-color:#FFFFFF;color:black;font-size:36px;'>The image on the left is showing a live camera feed from Trois-Rivieres, Canada</p>
+text=0,4,<img src='http://www.quebec511.info/Images/Cameras/TroisRivieres/cam/011.jpg?636351486600000000' width=512 height=512 />
+text=0,5,<center><img src='http://weather.gc.ca/data/satellite/goes_eusa_1070_100.jpg' width=5#2 height=512 /></center><div style='text-align:center;font-size:14px;border:1px solid black;background-color:#FFFFFF;color:black;'>Weather map Canada</div>
 
-text=5,0,<div>WebcamStudio</div><img src='https://github.com/WebcamStudio/webcamstudio/raw/master/src/webcamstudio/resources/splash.png' width=200 height=200 />
-text=6,0,<div>JapelServer</div><img src='https://a.fsdn.com/con/app/proj/japelserver/screenshots/244374.jpg/1' width=200 height=200 />
-text=7,0,<div>ScreenStudio</div><img src='http://www.crombz.com/wroom/screenstudio.png' width=200 height=200 />
+text=0,6,<div style='font-size:20px;text-align:center;'>Watch Big Buck Bunny<br>(Press Space!)</div><center><img src='https://peach.blender.org/wp-content/uploads/its-a-trap.png' width=400 height=400 />
 
-text=5,5,<div style='color:white;font-size:12px;text-align:center;'>Follow me on Twitter: @patrickballeux</div><center><img src='https://pbs.twimg.com/profile_images/512735871548665857/TcE8kqVn_400x400.jpeg' width=200 height=200 />
-text=10,5,<div style='color:white;font-size:12px;text-align:center;'>vid.me/patrickballeux</div><center><img src='https://pbs.twimg.com/media/BvMSJWWCcAAZqCr.jpg' width=200 height=200 />
+text=5,0,<div style='font-size:36px;'>WebcamStudio</div><center><img src='https://github.com/WebcamStudio/webcamstudio/raw/master/src/webcamstudio/resources/splash.png' height=400 />
+text=6,0,<div style='font-size:36px;'>JapelServer</div><center><img src='https://a.fsdn.com/con/app/proj/japelserver/screenshots/244374.jpg/1'  height=400 />
+text=7,0,<div style='font-size:36px;'>ScreenStudio</div><center><img src='http://www.crombz.com/wroom/screenstudio.png' width=100% />
+
+text=5,5,<div style='color:white;font-size:24px;text-align:center;'>Follow me on Twitter: @patrickballeux</div><center><img src='https://pbs.twimg.com/profile_images/512735871548665857/TcE8kqVn_400x400.jpeg' width=400 height=400 />
+text=10,5,<div style='color:white;font-size:28px;text-align:center;'>vid.me/patrickballeux</div><center><img src='https://pbs.twimg.com/media/BvMSJWWCcAAZqCr.jpg' width=400 height=400 />

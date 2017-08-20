@@ -117,7 +117,7 @@ public class Screen {
             }
             //calculate y coordinate on texture
             for (int y = drawStart; y < drawEnd; y++) {
-                int texY = (((y * 2 - height + lineHeight) << 8) / lineHeight) / 2;
+                int texY = (((y * 2 - height + lineHeight) << 8) / lineHeight) / 1;
                 int color = textures.get(texNum).pixels[texX + (texY * textures.get(texNum).SIZE)];
                 int alpha = (lineHeight * 255 / Texture.SIZE)+50;
                 if (alpha > 255) alpha = 255;
