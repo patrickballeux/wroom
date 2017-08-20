@@ -43,6 +43,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
     private int deltaStepsDir = 1;
     private static final int STEPHEIGHT = 3;
     private static final BasicStroke lineWidth = new BasicStroke(15);
+    private boolean enableHighQuality = true;
 
     /**
      * Creates new form Renderer
@@ -111,7 +112,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             double y = Integer.parseInt(key.split(",")[1]);
             x += 0.5;
             y += 0.5;
-            s.texture = new Texture(webicon,"<div style='background-color:white;border:2px solid #0000FF;color:#111111;text-align:center;'>"+file.getWebPages().get(key).toString()+"</div>",0);
+            s.texture = new Texture(webicon, "<div style='background-color:white;border:2px solid #0000FF;color:#111111;text-align:center;'>" + file.getWebPages().get(key).toString() + "</div>", 0);
             s.x = x;
             s.y = y;
             s.distance = 0;
@@ -158,7 +159,6 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             map[y][x] = textures.size();
         }
         camera = new Camera(startX, startY, 1, 0, 0, -.66, listener);
-        //forcing 800x600
         //screen = new Screen(map, textures, getWidth() - STEPHEIGHT, getHeight() - STEPHEIGHT, floor, ceiling, sprites,userSprites);
         image = new BufferedImage(Texture.SIZE * 4 / 3, Texture.SIZE, BufferedImage.TYPE_INT_ARGB);
         pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
@@ -168,8 +168,12 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         this.setOpaque(true);
         repaint();
         setVisible(true);
-        setDoubleBuffered(true);
+        //setDoubleBuffered(true);
         running = true;
+    }
+
+    public void setHighQuality(boolean value) {
+        enableHighQuality = value;
     }
 
     public ArrayList<Texture> getTextures() {
@@ -241,7 +245,9 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             deltaStepsDir = 1;
         }
         //g.drawImage(image, 0, 0 + deltaSteps, this);
-        g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY);
+        if (enableHighQuality) {
+            g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY);
+        }
         int w = getWidth();
         int h = w * image.getHeight() / image.getWidth();
         int x = (getWidth() - w) / 2;
