@@ -11,6 +11,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
@@ -76,6 +77,8 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         }
         this.teleports = file.getTeleports();
         Texture teleporticon = new Texture(getClass().getResource("/webroom/gui/teleport.png"));
+        Texture mediaicon = new Texture(getClass().getResource("spritemediaplay.png"));
+        Texture webicon = new Texture(getClass().getResource("spriteweblink.png"));
         sprites = new ArrayList<>();
         for (String key : teleports.keySet()) {
             Sprite s = new Sprite();
@@ -97,6 +100,30 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             y += 0.5;
             Texture media = new Texture(file.getMedias().get(key), true);
             s.texture = media;
+            s.x = x;
+            s.y = y;
+            s.distance = 0;
+            sprites.add(s);
+        }
+        for (String key : file.getWebPages().keySet()) {
+            Sprite s = new Sprite();
+            double x = Integer.parseInt(key.split(",")[0]);
+            double y = Integer.parseInt(key.split(",")[1]);
+            x += 0.5;
+            y += 0.5;
+            s.texture = new Texture(webicon,"<div style='background-color:white;border:2px solid #0000FF;color:#111111;text-align:center;'>"+file.getWebPages().get(key).toString()+"</div>",0);
+            s.x = x;
+            s.y = y;
+            s.distance = 0;
+            sprites.add(s);
+        }
+        for (String key : file.getEmbeded().keySet()) {
+            Sprite s = new Sprite();
+            double x = Integer.parseInt(key.split(",")[0]);
+            double y = Integer.parseInt(key.split(",")[1]);
+            x += 0.5;
+            y += 0.5;
+            s.texture = mediaicon;
             s.x = x;
             s.y = y;
             s.distance = 0;
@@ -134,7 +161,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         camera = new Camera(startX, startY, 1, 0, 0, -.66, listener);
         //forcing 800x600
         //screen = new Screen(map, textures, getWidth() - STEPHEIGHT, getHeight() - STEPHEIGHT, floor, ceiling, sprites,userSprites);
-        image = new BufferedImage(Texture.SIZE *4 /3, Texture.SIZE, BufferedImage.TYPE_INT_ARGB);
+        image = new BufferedImage(Texture.SIZE * 4 / 3, Texture.SIZE, BufferedImage.TYPE_INT_ARGB);
         pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
         screen = new Screen(map, textures, image.getWidth(), image.getHeight(), floor, ceiling, sprites, userSprites);
         thread = new Thread(this);
@@ -191,8 +218,10 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
     private long imageCountFPS = 0;
     private long fps = 0;
 
-    public void paint(Graphics g) {
+    public void paint(Graphics gg) {
+        Graphics2D g = (Graphics2D) gg;
         g.setColor(Color.BLACK);
+        g.clearRect(0, 0, getWidth(), getHeight());
         g.fillRect(0, 0, getWidth(), getHeight());
         try {
             screen.update(camera, pixels);
@@ -213,13 +242,14 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             deltaStepsDir = 1;
         }
         //g.drawImage(image, 0, 0 + deltaSteps, this);
+        g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY);
         int w = getWidth();
         int h = w * image.getHeight() / image.getWidth();
         int x = (getWidth() - w) / 2;
         int y = ((getHeight() - h) / 2) + deltaSteps;
         //g.drawImage(image,0,0,null);
-        g.drawImage(image, x, y, w+x, h+y, 0, 0, image.getWidth(), image.getHeight(), null);
-        //g.drawImage(image.getScaledInstance(w, h, java.awt.Image.SCALE_FAST), x, y, null);
+        g.drawImage(image, x, y, w + x, h + y, 0, 0, image.getWidth(), image.getHeight(), null);
+        //g.drawImage(image.getScaledInstance(w, h, java.awt.Image.SCALE_SMOOTH), x, y, null);
         g.setFont(new Font("Monospaced", Font.BOLD, 16));
         y = 20;
         for (int i = 0; i < userMessages.size(); i++) {
@@ -239,10 +269,10 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             imageCountFPS = 0;
             lastFPSCount = System.currentTimeMillis();
             //adjust camera speed
-            camera.MOVE_SPEED = 2D / fps;
-            camera.ROTATION_SPEED = 2D / fps;
+            camera.MOVE_SPEED = Math.PI / fps / 2D;
+            camera.ROTATION_SPEED = Math.PI / fps / 2D;
         }
-        g.setColor(Color.gray);
+        g.setColor(Color.red);
         g.drawString("FPS: " + fps, 2, getHeight() - 5);
     }
 
@@ -269,9 +299,9 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
                 formMouseClicked(evt);
             }
         });
-        addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentResized(java.awt.event.ComponentEvent evt) {
-                formComponentResized(evt);
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                formKeyPressed(evt);
             }
         });
 
@@ -291,25 +321,80 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
 
     }//GEN-LAST:event_formAncestorRemoved
 
+    private void sendOnAction(double cameraX) {
+        double rayDirX = camera.xDir + camera.xPlane * cameraX;
+        double rayDirY = camera.yDir + camera.yPlane * cameraX;
+        //Map position
+        int mapX = (int) camera.xPos;
+        int mapY = (int) camera.yPos;
+        //length of ray from current position to next x or y-side
+        double sideDistX;
+        double sideDistY;
+        //Length of ray from one side to next in map
+        double deltaDistX = Math.sqrt(1 + (rayDirY * rayDirY) / (rayDirX * rayDirX));
+        double deltaDistY = Math.sqrt(1 + (rayDirX * rayDirX) / (rayDirY * rayDirY));
+        //Direction to go in x and y
+        int stepX, stepY;
+        boolean hit = false;//was a wall hit
+        //Figure out the step direction and initial distance to a side
+        if (rayDirX < 0) {
+            stepX = -1;
+            sideDistX = (camera.xPos - mapX) * deltaDistX;
+        } else {
+            stepX = 1;
+            sideDistX = (mapX + 1.0 - camera.xPos) * deltaDistX;
+        }
+        if (rayDirY < 0) {
+            stepY = -1;
+            sideDistY = (camera.yPos - mapY) * deltaDistY;
+        } else {
+            stepY = 1;
+            sideDistY = (mapY + 1.0 - camera.yPos) * deltaDistY;
+        }
+        //Loop to find where the ray hits a wall
+        int counter = 0; // testing only block away for 3 times
+        while (!hit && counter++ < 2) {
+            //Jump to next square
+            if (sideDistX < sideDistY) {
+                sideDistX += deltaDistX;
+                mapX += stepX;
+            } else {
+                sideDistY += deltaDistY;
+                mapY += stepY;
+            }
+            //Check if ray has hit a wall
+            if (!hit && map[mapX][mapY] > 0) {
+                hit = true;
+            } else //Check if ray has hit a sprite
+            {
+                for (Sprite s : sprites) {
+                    if (((int) s.y) == (int) mapX && ((int) s.x) == (int) mapY) {
+                        hit = true;
+                    }
+                }
+            }
+        }
+        if (hit) {
+            listener.OnAction((int) mapY, (int) mapX);
+        }
+    }
+
+
     private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
         this.requestFocus();
         if (evt.getClickCount() == 2) {
-            listener.OnAction((int) camera.yPos, (int) camera.xPos);
+            // Find if object was clicked...
+            double cameraX = (evt.getX() * 2D / getWidth()) - 1D;
+            sendOnAction(cameraX);
+
         }
     }//GEN-LAST:event_formMouseClicked
 
-    private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
-//        if (getWidth() > 0 && (image == null || image.getWidth() != getWidth())) {
-//            //we need to keep a 4/3 ratio
-//            int w = getWidth() / 2 * 2;
-//            int h = getHeight() / 2 * 2;
-//            image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-//            pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-//            screen = new Screen(map, textures, image.getWidth(), image.getHeight(), floor, ceiling, sprites,userSprites);
-//            camera.setSize(getBounds());
-//        }
-
-    }//GEN-LAST:event_formComponentResized
+    private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
+            sendOnAction(0);
+        }
+    }//GEN-LAST:event_formKeyPressed
 
     public void run() {
         requestFocus();

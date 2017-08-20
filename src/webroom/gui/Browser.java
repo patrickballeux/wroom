@@ -774,22 +774,16 @@ public class Browser extends javax.swing.JFrame implements Message {
         String loc = x + "," + y;
         Texture mediaTexture = null;
 
-        for (int i = x - 1; i <= x + 1; i++) {
-            for (int j = y - 1; j <= y + 1; j++) {
-                if (renderer.getMap()[j][i] > 0) {
-                    Texture t = renderer.getTextures().get(renderer.getMap()[j][i] - 1);
-                    System.out.println("testing texture " + renderer.getMap()[j][i]);
-                    if (t.hasMedia()) {
-                        mediaTexture = t;
-                        System.out.println("Texture has media");
-                        break;
-                    }
-                }
-            }
-            if (mediaTexture != null) {
-                break;
+        //Check if Texture has Media
+        if (renderer.getMap()[y][x] > 0) {
+            Texture t = renderer.getTextures().get(renderer.getMap()[y][x] - 1);
+            System.out.println("testing texture " + renderer.getMap()[y][x]);
+            if (t.hasMedia()) {
+                mediaTexture = t;
+                System.out.println("Texture has media");
             }
         }
+
         if (mediaTexture != null) {
             if (mediaTexture.isMediaPlaying()) {
                 mediaTexture.stopMedia();
@@ -822,11 +816,8 @@ public class Browser extends javax.swing.JFrame implements Message {
         if (medias.containsKey(loc)) {
             //Find the sprite to play the video
             for (Sprite s : renderer.getSprites()) {
-                System.out.println((int)s.x + "," + (int)s.y);
-                if (x == (int)s.x && y == (int)s.y) {
-                    System.out.println("Current Texture...");
+                if (x == (int) s.x && y == (int) s.y) {
                     if (s.texture.hasMedia()) {
-                        System.out.println("Texture has media");
                         if (s.texture.isMediaPlaying()) {
                             s.texture.stopMedia();
                         } else {

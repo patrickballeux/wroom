@@ -44,11 +44,6 @@ public class Camera implements KeyListener {
         if (key.getKeyCode() == KeyEvent.VK_CONTROL) {
             strafe = true;
         }
-        // TODO Auto-generated method stub
-        if (key.getKeyCode() == KeyEvent.VK_SPACE) {
-            // coordinates are reversed...
-            listener.OnAction((int) this.yPos, (int) this.xPos);
-        }
     }
 
     @Override
