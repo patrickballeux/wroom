@@ -905,27 +905,23 @@ public class Browser extends javax.swing.JFrame implements Message {
     }
 
     @Override
-    public void OnTrigger(int x, int y
-    ) {
+    public void OnTrigger(int x, int y) {
         if (irc != null && irc.isConnected()) {
             irc.doPrivmsg(chatroom, "MOVING TO:" + x + "x" + y);
         }
     }
 
     @Override
-    public void OnNotification(int x, int y, String msg
-    ) {
+    public void OnNotification(int x, int y, String msg) {
         rendStatus.updateStatus(msg);
     }
 
     @Override
-    public void OnError(int x, int y, String error
-    ) {
+    public void OnError(int x, int y, String error) {
     }
 
     @Override
-    public void onCloseView(JComponent comp
-    ) {
+    public void onCloseView(JComponent comp) {
         try {
             if (comp instanceof VideoPanel) {
                 VideoPanel media = (VideoPanel) comp;

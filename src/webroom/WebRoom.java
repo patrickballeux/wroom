@@ -13,7 +13,7 @@ import webroom.gui.Browser;
  */
 public class WebRoom {
 
-    public static final String VERSION = "0.0.10 ALPHA"; 
+    public static final String VERSION = "0.0.11 ALPHA"; 
     public static boolean NOCHAT = false; 
    /**
      * @param args the command line arguments
