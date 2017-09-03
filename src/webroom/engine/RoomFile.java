@@ -58,15 +58,16 @@ public class RoomFile {
         InputStream in;
         in = new URL(finalURL).openStream();
         byte[] buffer = new byte[65536 * 4];
-        listener.OnNotification(0,0,"Loading map...");
+        listener.OnNotification(0, 0, "Loading map...");
         int count = in.read(buffer);
         content = new String(buffer, 0, count);
         in.close();
         String[] lines = content.split("\n");
         ArrayList<String> mapLines = new ArrayList<>();
-        listener.OnNotification(0,0,"Parsing map...");
+        listener.OnNotification(0, 0, "Parsing map...");
         title = "Undefined...";
-        for (String line : lines) {
+        for (int lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+            String line = lines[lineIndex];
             System.out.println(line);
             if (line.trim().toLowerCase().startsWith("texture=")) {
                 String data = line.split("=")[1];
@@ -113,7 +114,7 @@ public class RoomFile {
                         Teleport t = new Teleport();
                         t.base = new URL(action[3].trim());
                         teleports.put((action[1] + "," + action[2]).trim(), t);
-                        if (action.length == 5){
+                        if (action.length == 5) {
                             t.title = action[4];
                         } else {
                             t.title = t.base.toString();
@@ -146,7 +147,23 @@ public class RoomFile {
                 backgroundSound = new URL(base.toString() + "/" + line.split("=")[1]);
             } else if (line.trim().toLowerCase().startsWith("text=")) {
                 String text[] = line.replaceFirst("text=", "").split(",");
-                texts.put(text[0] + "," + text[1], text[2]);
+                if (text.length == 3) {
+                    //Text is on a single ligne...
+                    texts.put(text[0] + "," + text[1], text[2]);
+                } else {
+                    //Text is on multiple lines....
+                    String key = (text[0] + "," + text[1]).trim();
+                    String textContent = "";
+                    for (int i = lineIndex+1; i < lines.length; i++) {
+                        if (!lines[i].trim().toLowerCase().equals("=text")) {
+                            textContent += lines[i].trim();
+                        } else {
+                            lineIndex = i-1;
+                            break;
+                        }
+                    }
+                    texts.put(key, textContent);
+                }
             } else if (line.trim().toLowerCase().startsWith("start=")) {
                 startX = new Double(line.split("=")[1].split(",")[0]);
                 startY = new Double(line.split("=")[1].split(",")[1]);
@@ -155,7 +172,7 @@ public class RoomFile {
             }
         }
         //convert to map...
-        listener.OnNotification(0,0,"Creating floor...");
+        listener.OnNotification(0, 0, "Creating floor...");
         map = new int[mapLines.size()][mapLines.get(0).split(",").length];
         System.out.println("Map size: " + map.length + "x" + map[0].length);
         for (int y = 0; y < mapLines.size(); y++) {
@@ -164,7 +181,7 @@ public class RoomFile {
                 map[y][x] = new Integer(row[x].trim());
             }
         }
-        listener.OnNotification(0,0,"Welcome to " + title);
+        listener.OnNotification(0, 0, "Welcome to " + title);
     }
 
     public String getChatroom() {

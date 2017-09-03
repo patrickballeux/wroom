@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 public class Texture implements Runnable {
 
@@ -80,7 +81,7 @@ public class Texture implements Runnable {
     }
 
     private void initLabel(Graphics2D g) {
-        String html = "<html><body width=" + SIZE + " height=" + SIZE + ">" + text + "</body></html>";
+        String html = "<html><body width=" + SIZE + " >" + text + "</body></html>";
         if (text.trim().length() > 0) {
             label = new JLabel(html);
             label.setSize(SIZE, SIZE);
@@ -88,6 +89,7 @@ public class Texture implements Runnable {
             label.setForeground(Color.BLACK.brighter());
             label.setFont(new Font("Monospaced", Font.BOLD, 24));
             label.setPreferredSize(label.getSize());
+            label.setVerticalAlignment(SwingConstants.CENTER);
             label.setOpaque(false);
             g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY);
             g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);

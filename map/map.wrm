@@ -50,7 +50,7 @@ action=door,11,3
 
 #action=download,6,6,http://crombz.com/wroom/floor.jpg
 action=message,6,7,You are near a teleporter...
-action=media,1,6,http://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4
+action=media,1,6,http://wroom.crombz.com/BigBuckBunny_640x360.mp4
 action=message,1,6,Playing Big Buck Bunny video...
 
 action=browse,7,1,http://screenstudio.crombz.com
@@ -68,12 +68,29 @@ action=message,11,5,Opening Vid.me channel...
 # Load text to display on walls
 # TEXT=x,7,HTML text entry...  
 #text=8,8,<div  style='height:512px;font-size:16px;border:1px solid black;background-color:#FFFFFF;color:red;'>Teleport to Home base<br>Press SPACE</div>
-text=0,2,<p>Welcome to my WRoom!</p><p style='border:1px solid black;background-color:#FFFFFF;color:red;'>Basic HTML tags are supported...</p>
-text=0,3,<p style='border:1px solid black;background-color:#FFFFFF;color:black;font-size:36px;'>The image on the left is showing a live camera feed from Trois-Rivieres, Canada</p>
-text=0,4,<img src='http://www.quebec511.info/Images/Cameras/TroisRivieres/cam/011.jpg?636351486600000000' width=512 height=512 />
-text=0,5,<center><img src='http://weather.gc.ca/data/satellite/goes_eusa_1070_100.jpg' width=5#2 height=512 /></center><div style='text-align:center;font-size:14px;border:1px solid black;background-color:#FFFFFF;color:black;'>Weather map Canada</div>
-
-text=0,6,<div style='font-size:20px;text-align:center;'>Watch Big Buck Bunny<br>(Press Space!)</div><center><img src='https://peach.blender.org/wp-content/uploads/its-a-trap.png' width=400 height=400 />
+text=0,2
+<p>Welcome to my WRoom!</p><p style='border:1px solid black;background-color:#FFFFFF;color:red;'>
+Basic HTML tags are supported...</p>
+=text
+text=0,3
+<p style='border:1px solid black;background-color:#FFFFFF;color:black;font-size:36px;'>
+The image on the left is showing a live camera feed from Trois-Rivieres, Canada
+</p>
+=text
+text=0,4
+<img src='http://www.quebec511.info/Images/Cameras/TroisRivieres/cam/011.jpg?636351486600000000' width=512 height=512 />
+=text
+text=0,5
+<center>
+<img src='http://weather.gc.ca/data/satellite/goes_eusa_1070_100.jpg' width=5#2 height=512 />
+</center>
+<div style='text-align:center;font-size:14px;border:1px solid black;background-color:#FFFFFF;color:black;'>
+Weather map Canada
+</div>
+=text
+text=0,6
+<div style='font-size:20px;text-align:center;'>Watch Big Buck Bunny<br>(Press Space!)</div><center><img src='https://peach.blender.org/wp-content/uploads/its-a-trap.png' width=400 height=400 />
+=text
 
 text=5,0,<div style='font-size:36px;'>WebcamStudio</div><center><img src='https://github.com/WebcamStudio/webcamstudio/raw/master/src/webcamstudio/resources/splash.png' height=400 />
 text=6,0,<div style='font-size:36px;'>JapelServer</div><center><img src='https://a.fsdn.com/con/app/proj/japelserver/screenshots/244374.jpg/1'  height=400 />
