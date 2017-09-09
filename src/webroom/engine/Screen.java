@@ -11,7 +11,8 @@ public class Screen {
     private final Texture ceiling;
     private ArrayList<Sprite> systemSprites;
     private ArrayList<Sprite> userSprites;
-    public Screen(int[][] m, ArrayList<Texture> tex, int w, int h, Texture f, Texture c,  ArrayList<Sprite> sprites,ArrayList<Sprite> usersprites) {
+
+    public Screen(int[][] m, ArrayList<Texture> tex, int w, int h, Texture f, Texture c, ArrayList<Sprite> sprites, ArrayList<Sprite> usersprites) {
         // inverse x and y as calculus are made for y,x
         map = m;
         textures = tex;
@@ -20,29 +21,27 @@ public class Screen {
         floor = f;
         ceiling = c;
         this.systemSprites = sprites;
-    this.userSprites = usersprites;
-    }   
+        this.userSprites = usersprites;
+    }
 
     public int[] update(Camera camera, int[] pixels) {
         double[] ZBuffer = new double[width];
+        double cameraX, rayDirX, rayDirY, sideDistX, sideDistY, deltaDistX, deltaDistY, perpWallDist;
+        int mapX, mapY, stepX, stepY, side;
+        boolean hit;
         for (int x = 0; x < width; x = x + 1) {
-            double cameraX = 2 * x / (double) (width) - 1;
-            double rayDirX = camera.xDir + camera.xPlane * cameraX;
-            double rayDirY = camera.yDir + camera.yPlane * cameraX;
+            cameraX = 2 * x / (double) (width) - 1;
+            rayDirX = camera.xDir + camera.xPlane * cameraX;
+            rayDirY = camera.yDir + camera.yPlane * cameraX;
             //Map position
-            int mapX = (int) camera.xPos;
-            int mapY = (int) camera.yPos;
-            //length of ray from current position to next x or y-side
-            double sideDistX;
-            double sideDistY;
+            mapX = (int) camera.xPos;
+            mapY = (int) camera.yPos;
             //Length of ray from one side to next in map
-            double deltaDistX = Math.sqrt(1 + (rayDirY * rayDirY) / (rayDirX * rayDirX));
-            double deltaDistY = Math.sqrt(1 + (rayDirX * rayDirX) / (rayDirY * rayDirY));
-            double perpWallDist;
+            deltaDistX = Math.sqrt(1 + (rayDirY * rayDirY) / (rayDirX * rayDirX));
+            deltaDistY = Math.sqrt(1 + (rayDirX * rayDirX) / (rayDirY * rayDirY));
             //Direction to go in x and y
-            int stepX, stepY;
-            boolean hit = false;//was a wall hit
-            int side = 0;//was the wall vertical or horizontal
+            hit = false;//was a wall hit
+            side = 0;//was the wall vertical or horizontal
             //Figure out the step direction and initial distance to a side
             if (rayDirX < 0) {
                 stepX = -1;
@@ -108,20 +107,23 @@ public class Screen {
             }
             wallX -= Math.floor(wallX);
             //x coordinate on the texture
-            int texX = (int) (wallX * (textures.get(texNum).SIZE));
+            Texture selectedTexture = textures.get(texNum);
+            int texX = (int) (wallX * (Texture.SIZE));
             if (side == 0 && rayDirX > 0) {
-                texX = textures.get(texNum).SIZE - texX - 1;
+                texX = Texture.SIZE - texX - 1;
             }
             if (side == 1 && rayDirY < 0) {
-                texX = textures.get(texNum).SIZE - texX - 1;
+                texX = Texture.SIZE - texX - 1;
             }
             //calculate y coordinate on texture
             for (int y = drawStart; y < drawEnd; y++) {
                 int texY = (((y * 2 - height + lineHeight) << 8) / lineHeight) / 1;
-                int color = textures.get(texNum).pixels[texX + (texY * textures.get(texNum).SIZE)];
-                int alpha = (lineHeight * 255 / Texture.SIZE)+50;
-                if (alpha > 255) alpha = 255;
-                pixels[x + y * (width)] = color & ((alpha<<24)|0xFFFFFF);
+                int color = selectedTexture.pixels[texX + (texY * Texture.SIZE)];
+                int alpha = (lineHeight * 255 / Texture.SIZE) + 100;
+                if (alpha > 255) {
+                    alpha = 255;
+                }
+                pixels[x + y * (width)] = color & ((alpha << 24) | 0xFFFFFF);
             }
             ZBuffer[x] = perpWallDist; //perpendicular distance is used
             //FLOOR CASTING
@@ -159,14 +161,18 @@ public class Screen {
                 floorTexX = (int) (currentFloorX * floor.SIZE) % floor.SIZE;
                 floorTexY = (int) (currentFloorY * floor.SIZE) % floor.SIZE;
                 //ceiling (symmetrical!)
-                int alpha = (int)((y-(height/2)) * 255 / (height/2))+50;
-                if (alpha > 255) alpha = 255;
-                if (alpha < 0) alpha = 0;
+                int alpha = (int) ((y - (height / 2)) * 255 / (height / 2)) + 100;
+                if (alpha > 255) {
+                    alpha = 255;
+                }
+                if (alpha < 0) {
+                    alpha = 0;
+                }
                 int ceilingColor = ceiling.pixels[(ceiling.SIZE * floorTexY) + floorTexX];
-                pixels[x + ((height - y) * width)] = ceilingColor & ((alpha<<24)|0xFFFFFF);
+                pixels[x + ((height - y) * width)] = ceilingColor & ((alpha << 24) | 0xFFFFFF);
                 //floor
                 int floorColor = floor.pixels[floor.SIZE * floorTexY + floorTexX];
-                pixels[x + (y * width)] = floorColor & ((alpha<<24)|0xFFFFFF);
+                pixels[x + (y * width)] = floorColor & ((alpha << 24) | 0xFFFFFF);
             }
 
         }
@@ -189,10 +195,11 @@ public class Screen {
 
         //after sorting the sprites, do the projection and draw them
         for (int i = 0; i < sprites.size(); i++) {
+            Sprite selectedSprite = sprites.get(i);
             //translate sprite position to relative to camera
             // coordinates are expecting y,y
-            double spriteX = sprites.get(i).y - camera.xPos;
-            double spriteY = sprites.get(i).x - camera.yPos;
+            double spriteX = selectedSprite.y - camera.xPos;
+            double spriteY = selectedSprite.x - camera.yPos;
             double invDet = 1.0 / (camera.xPlane * camera.yDir - camera.xDir * camera.yPlane); //required for correct matrix multiplication
             double transformX = invDet * (camera.yDir * spriteX - camera.xDir * spriteY);
             double transformY = invDet * (-camera.yPlane * spriteX + camera.xPlane * spriteY); //this is actually the depth inside the screen, that what Z is in 3D
@@ -220,8 +227,10 @@ public class Screen {
             if (drawEndX >= width) {
                 drawEndX = width - 1;
             }
-            int alpha = (spriteHeight * 255 / height)+50;
-            if (alpha > 255) alpha = 255;
+            int alpha = (spriteHeight * 255 / height) + 150;
+            if (alpha > 255) {
+                alpha = 255;
+            }
             //loop through every vertical stripe of the sprite on screen
             for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
                 int texX = (int) (256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * Texture.SIZE / spriteWidth) / 256;
@@ -231,9 +240,9 @@ public class Screen {
                         int d = (y) * 256 - height * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
                         int texY = ((d * Texture.SIZE) / spriteHeight) / 256;
 
-                        int color = sprites.get(i).texture.pixels[(Texture.SIZE * texY) + texX]; //get current color from the texture
+                        int color = selectedSprite.texture.pixels[(Texture.SIZE * texY) + texX]; //get current color from the texture
                         if ((color & 0x00FFFFFF) != 0) {
-                            pixels[(y * width) + stripe] = color & ((alpha<<24) | 0xFFFFFF); //paint pixel if it isn't black, black is the invisible color
+                            pixels[(y * width) + stripe] = color & ((alpha << 24) | 0xFFFFFF); //paint pixel if it isn't black, black is the invisible color
                         }
                     }
                 }

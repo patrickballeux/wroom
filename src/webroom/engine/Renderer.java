@@ -221,7 +221,8 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
     private long imageCountFPS = 0;
     private long fps = 0;
 
-    public void paint(Graphics gg) {
+    @Override
+    public void paintComponent(Graphics gg) {
         Graphics2D g = (Graphics2D) gg;
         g.setColor(Color.BLACK);
         g.clearRect(0, 0, getWidth(), getHeight());
