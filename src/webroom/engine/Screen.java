@@ -11,7 +11,7 @@ public class Screen {
     private final Texture ceiling;
     private ArrayList<Sprite> systemSprites;
     private ArrayList<Sprite> userSprites;
-
+private java.util.Comparator<Sprite> sorter;
     public Screen(int[][] m, ArrayList<Texture> tex, int w, int h, Texture f, Texture c, ArrayList<Sprite> sprites, ArrayList<Sprite> usersprites) {
         // inverse x and y as calculus are made for y,x
         map = m;
@@ -22,6 +22,12 @@ public class Screen {
         ceiling = c;
         this.systemSprites = sprites;
         this.userSprites = usersprites;
+        sorter = new java.util.Comparator<Sprite>() {
+            @Override
+            public int compare(Sprite o1, Sprite o2) {
+                return new Double(o2.distance).compareTo(new Double(o1.distance));
+            }
+        };
     }
 
     public int[] update(Camera camera, int[] pixels) {
@@ -177,7 +183,6 @@ public class Screen {
 
         }
         //SPRITE CASTING
-
         //sort sprites from far to close
         ArrayList<Sprite> sprites = new ArrayList<>();
         sprites.addAll(systemSprites);
@@ -185,13 +190,7 @@ public class Screen {
         for (int i = 0; i < sprites.size(); i++) {
             sprites.get(i).distance = ((camera.xPos - sprites.get(i).y) * (camera.xPos - sprites.get(i).y) + (camera.yPos - sprites.get(i).x) * (camera.yPos - sprites.get(i).x)); //sqrt not taken, unneeded
         }
-        //combSort(spriteOrder, spriteDistance, sprites.size());
-        sprites.sort(new java.util.Comparator<Sprite>() {
-            @Override
-            public int compare(Sprite o1, Sprite o2) {
-                return new Double(o2.distance).compareTo(new Double(o1.distance));
-            }
-        });
+        sprites.sort(sorter);
 
         //after sorting the sprites, do the projection and draw them
         for (int i = 0; i < sprites.size(); i++) {

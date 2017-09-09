@@ -168,7 +168,8 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         this.setOpaque(true);
         repaint();
         setVisible(true);
-        //setDoubleBuffered(true);
+        setFont(new Font("Monospaced", Font.BOLD, 16));
+        setDoubleBuffered(true);
         running = true;
     }
 
@@ -224,9 +225,8 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
     @Override
     public void paintComponent(Graphics gg) {
         Graphics2D g = (Graphics2D) gg;
-        g.setColor(Color.BLACK);
+        g.setBackground(Color.BLACK);
         g.clearRect(0, 0, getWidth(), getHeight());
-        g.fillRect(0, 0, getWidth(), getHeight());
         try {
             screen.update(camera, pixels);
             if (System.currentTimeMillis() - startTime < 1000) {
@@ -246,8 +246,13 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             deltaStepsDir = 1;
         }
         //g.drawImage(image, 0, 0 + deltaSteps, this);
+        g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_SPEED);
+        g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_OFF);
+        g.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING, java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         if (enableHighQuality) {
-            g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY);
+            g.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        } else {
+            g.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         }
         int w = getWidth();
         int h = w * image.getHeight() / image.getWidth();
@@ -255,8 +260,6 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
         int y = ((getHeight() - h) / 2) + deltaSteps;
         //g.drawImage(image,0,0,null);
         g.drawImage(image, x, y, w + x, h + y, 0, 0, image.getWidth(), image.getHeight(), null);
-        //g.drawImage(image.getScaledInstance(w, h, java.awt.Image.SCALE_SMOOTH), x, y, null);
-        g.setFont(new Font("Monospaced", Font.BOLD, 16));
         y = 20;
         for (int i = 0; i < userMessages.size(); i++) {
             String m = userMessages.get(i);
@@ -267,7 +270,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             y += 20;
         }
         g.setColor(Color.BLACK);
-        ((Graphics2D) g).setStroke(lineWidth);
+        g.setStroke(lineWidth);
         g.drawRect(0, 0, getWidth(), getHeight());
         imageCountFPS++;
         if (System.currentTimeMillis() - lastFPSCount >= 1000) {
