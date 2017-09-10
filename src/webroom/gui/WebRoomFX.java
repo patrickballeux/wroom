@@ -18,7 +18,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.EventType;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -28,7 +27,6 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -303,7 +301,7 @@ public class WebRoomFX extends Application implements Message {
                 URL dl = currentFile.getDownloads().get(loc);
                 downloadFile(dl);
             } catch (IOException ex) {
-                Logger.getLogger(Browser.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         if (currentFile.getMedias().containsKey(loc)) {
@@ -384,7 +382,7 @@ public class WebRoomFX extends Application implements Message {
                             Thread.sleep(500);
                         }
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(Browser.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     renderer.getMap()[y][x] = oldTexture;
                     System.out.println("Closing door...");
@@ -460,12 +458,12 @@ public class WebRoomFX extends Application implements Message {
                     out.close();
                     in.close();
                 } catch (IOException ex) {
-                    Logger.getLogger(Browser.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
                     try {
                         in.close();
                     } catch (IOException ex) {
-                        Logger.getLogger(Browser.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
