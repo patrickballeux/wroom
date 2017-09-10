@@ -229,7 +229,6 @@ public class RendererFX extends Canvas {
                     sendOnAction(0);
                 }
             }
-            //System.out.println("Last Touch Delay: " + (System.currentTimeMillis() - lastTouchPressed));
             lastTouchPressed = System.currentTimeMillis();
             lastTouched = event.getTouchPoint();
             event.consume();
