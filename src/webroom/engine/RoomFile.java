@@ -68,7 +68,6 @@ public class RoomFile {
         title = "Undefined...";
         for (int lineIndex = 0; lineIndex < lines.length; lineIndex++) {
             String line = lines[lineIndex];
-            System.out.println(line);
             if (line.trim().toLowerCase().startsWith("texture=")) {
                 String data = line.split("=")[1];
                 if (data.contains(",")) {
@@ -140,7 +139,6 @@ public class RoomFile {
                         break;
                     case "door":
                         doors.put((action[1] + "," + action[2]).trim(), "");
-                        System.out.println("Adding door at " + action[1] + "," + action[2]);
                         break;
                 }
             } else if (line.trim().toLowerCase().startsWith("backgroundsound=")) {
@@ -174,7 +172,6 @@ public class RoomFile {
         //convert to map...
         listener.OnNotification(0, 0, "Creating floor...");
         map = new int[mapLines.size()][mapLines.get(0).split(",").length];
-        System.out.println("Map size: " + map.length + "x" + map[0].length);
         for (int y = 0; y < mapLines.size(); y++) {
             String[] row = mapLines.get(y).split(",");
             for (int x = 0; x < row.length; x++) {

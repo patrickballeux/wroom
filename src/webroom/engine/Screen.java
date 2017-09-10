@@ -30,6 +30,7 @@ private java.util.Comparator<Sprite> sorter;
         };
     }
 
+    
     public int[] update(Camera camera, int[] pixels) {
         double[] ZBuffer = new double[width];
         double cameraX, rayDirX, rayDirY, sideDistX, sideDistY, deltaDistX, deltaDistY, perpWallDist;

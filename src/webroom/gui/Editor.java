@@ -602,4 +602,9 @@ public class Editor extends javax.swing.JDialog implements Message {
     public void onCloseView(JComponent comp) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public void onChatRequest() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

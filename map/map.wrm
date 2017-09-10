@@ -45,6 +45,7 @@ action=sound,7,7,teleport.wav
 action=teleport,5,7,http://wroom.crombz.com/youtube.wrm,My Favorite Covers: Frog Leap Studio
 action=sound,5,7,teleport.wav
 action=teleport,3,7,http://wroom.crombz.com/mars/map.wrm,Planet Mars: Find the exit!
+action=browse,3,8,https://www.babylonjs.com/
 action=sound,3,7,teleport.wav
 action=door,11,3
 

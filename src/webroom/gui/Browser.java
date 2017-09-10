@@ -58,6 +58,7 @@ public class Browser extends javax.swing.JFrame implements Message {
     private TreeMap<String, URL> medias;
     private TreeMap<String, URL> webpages;
     private TreeMap<String, String> embeded;
+
     private java.util.prefs.Preferences preferences;
     private TreeMap<String, String> doors;
     private IRCConnection irc;
@@ -953,5 +954,9 @@ public class Browser extends javax.swing.JFrame implements Message {
         } catch (Exception ex) {
         }
         panViewer.updateUI();
+    }
+
+    @Override
+    public void onChatRequest() {
     }
 }

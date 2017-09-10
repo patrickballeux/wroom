@@ -181,7 +181,6 @@ public class SourceFFMpeg {
                 command = "libs/ffmpeg  -v 0 -i " + mInput + " " + filter + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
             }
         }
-        System.out.println(command);
         mProcess = Runtime.getRuntime().exec(command);
         new Thread(new Runnable() {
             @Override

@@ -17,4 +17,5 @@ public interface Message {
     public void OnNotification(int x, int y, String msg);
     public void OnError(int x, int y, String error);
     public void onCloseView(JComponent comp);
+    public void onChatRequest();
 }

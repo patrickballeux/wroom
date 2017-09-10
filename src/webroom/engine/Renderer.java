@@ -279,7 +279,7 @@ public class Renderer extends javax.swing.JPanel implements Runnable {
             lastFPSCount = System.currentTimeMillis();
             //adjust camera speed
             camera.MOVE_SPEED = Math.PI / fps / 2D;
-            camera.ROTATION_SPEED = Math.PI / fps / 2D;
+            camera.ROTATION_SPEED = Math.PI / fps / 2.5D;
         }
         g.setColor(Color.red);
         g.drawString("FPS: " + fps, 2, getHeight() - 5);

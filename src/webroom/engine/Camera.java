@@ -9,7 +9,7 @@ public class Camera implements KeyListener {
     public boolean left, right, forward, back, strafe;
     public double MOVE_SPEED = 0.09;
     public double ROTATION_SPEED = 0.08;
-    private double runFactor = 1D;
+    public double runFactor = 1D;
     private final Message listener;
     private int lastX = 0;
     private int lastY = 0;
