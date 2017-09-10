@@ -5,6 +5,7 @@
  */
 package webroom.gui;
 
+import java.awt.SplashScreen;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -111,7 +112,7 @@ public class WebRoomFX extends Application implements Message {
                 renderer.requestFocus();
                 renderer.toBack();
             });
-            
+
             btnOpenFile = new Button("...");
             btnOpenFile.setOnAction((event) -> {
                 javafx.stage.FileChooser chooser = new FileChooser();
@@ -183,7 +184,7 @@ public class WebRoomFX extends Application implements Message {
                     renderer.setScaleX(scaleY);
                     renderer.setScaleY(scaleY);
                 }
-                
+
                 topPanel.autosize();
                 topPanel.setLayoutX((primaryStage.widthProperty().doubleValue() - topPanel.widthProperty().doubleValue()) / 2);
             });
@@ -256,6 +257,11 @@ public class WebRoomFX extends Application implements Message {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        if (args.length == 1) {
+            if (args[0].equals("NOCHAT")) {
+                WebRoom.NOCHAT = true;
+            }
+        }
         launch(args);
     }
 

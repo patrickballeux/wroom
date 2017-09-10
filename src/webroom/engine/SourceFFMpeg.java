@@ -178,7 +178,7 @@ public class SourceFFMpeg {
             if (isOSX()) {
                 command = "libs/ffmpegosx  -v 0 -i " + mInput + " " + filter + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
             } else {
-                command = "libs/ffmpeg  -v 0 -i " + mInput + " " + filter + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
+                command = "/usr/bin/ffmpeg  -v 0 -i " + mInput + " " + filter + " -r " + mFPS + " -f rawvideo -pix_fmt argb tcp://127.0.0.1:" + videoStream.getLocalPort() + " -f s16le -ac 2 tcp://127.0.0.1:" + audioStream.getLocalPort();
             }
         }
         mProcess = Runtime.getRuntime().exec(command);

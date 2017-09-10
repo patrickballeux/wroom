@@ -9,8 +9,6 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import javafx.animation.AnimationTimer;
-import javafx.application.Platform;
-import javafx.scene.CacheHint;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.PixelFormat;
@@ -42,6 +40,7 @@ public class RendererFX extends Canvas {
     private AnimationTimer timer;
     GraphicsContext g = getGraphicsContext2D();
     PixelFormat<IntBuffer> pixelFormat = PixelFormat.getIntArgbInstance();
+    private long lastTouchPressed = 0;
 
     public RendererFX(RoomFile file, Message listener, ArrayList<Sprite> userSprites) {
         this.userSprites = userSprites;
@@ -51,9 +50,6 @@ public class RendererFX extends Canvas {
         ceiling = file.getCeiling();
         map = file.getMap();
         this.listener = listener;
-//        setCacheHint(CacheHint.SCALE);
-//        setCache(true);
-//        
         double startX = file.getStartX();
         double startY = file.getStartY();
         if (startX == -1) {
@@ -228,6 +224,13 @@ public class RendererFX extends Canvas {
             event.consume();
         });
         setOnTouchPressed((event) -> {
+            if (lastTouched != null) {
+                if (System.currentTimeMillis() - lastTouchPressed < 300) {
+                    sendOnAction(0);
+                }
+            }
+            //System.out.println("Last Touch Delay: " + (System.currentTimeMillis() - lastTouchPressed));
+            lastTouchPressed = System.currentTimeMillis();
             lastTouched = event.getTouchPoint();
             event.consume();
         });
@@ -236,18 +239,25 @@ public class RendererFX extends Canvas {
             camera.right = false;
             camera.forward = false;
             camera.back = false;
+            lastTouched = event.getTouchPoint();
             event.consume();
         });
-
-        setOnTouchStationary((event) -> {
+        setOnTouchMoved((event) -> {
             if (lastTouched.getX() + 30 < event.getTouchPoint().getX()) {
                 camera.right = true;
                 camera.left = false;
-            }
-            if (lastTouched.getX() - 30 > event.getTouchPoint().getX()) {
+            } else if (lastTouched.getX() - 30 > event.getTouchPoint().getX()) {
                 camera.left = true;
                 camera.right = false;
+            } else {
+                camera.left = false;
+                camera.right = false;
             }
+            event.consume();
+        });
+        setOnTouchStationary((event) -> {
+            //camera.right = false;
+            //camera.left = false;
             if (lastTouched.getY() + 30 < event.getTouchPoint().getY()) {
                 camera.forward = false;
                 camera.back = true;
@@ -367,6 +377,10 @@ public class RendererFX extends Canvas {
         }
     }
 
+    private double frameCount = 0;
+    private double fps = 0;
+    private long lastCountTime = System.currentTimeMillis();
+
     private void paint() {
         int width = (Texture.SIZE * 4 / 3);
         try {
@@ -377,11 +391,17 @@ public class RendererFX extends Canvas {
             }
             camera.update(map);
             //draw Pixels
-            //SwingFXUtils.toFXImage(image, wimg);
-            //g.fillRect(0, 0, width, Texture.SIZE);
             g.getPixelWriter().setPixels(0, 0, width, Texture.SIZE, pixelFormat, pixels, 0, width);
-            //g.drawImage(wimg, 0, 0);
-
+            frameCount++;
+            if (frameCount >= 30) {
+                double delta = (System.currentTimeMillis() - lastCountTime) / 1000D;
+                fps = frameCount / delta;
+                camera.MOVE_SPEED = Math.PI / fps / 2D;
+                camera.ROTATION_SPEED = Math.PI / fps / 3D;
+                frameCount = 0;
+                lastCountTime = System.currentTimeMillis();
+                //System.out.println("FPS: " + fps);
+            }
         } catch (Exception ex) {
             System.err.println("ERROR: " + ex.getMessage());
         }
