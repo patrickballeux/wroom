@@ -111,6 +111,7 @@ public class WebRoomFX extends Application implements Message {
                 renderer.requestFocus();
                 renderer.toBack();
             });
+            
             btnOpenFile = new Button("...");
             btnOpenFile.setOnAction((event) -> {
                 javafx.stage.FileChooser chooser = new FileChooser();
@@ -182,6 +183,7 @@ public class WebRoomFX extends Application implements Message {
                     renderer.setScaleX(scaleY);
                     renderer.setScaleY(scaleY);
                 }
+                
                 topPanel.autosize();
                 topPanel.setLayoutX((primaryStage.widthProperty().doubleValue() - topPanel.widthProperty().doubleValue()) / 2);
             });

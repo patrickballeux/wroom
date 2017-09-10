@@ -5,27 +5,22 @@
  */
 package webroom.engine;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.embed.swing.SwingFXUtils;
+import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
+import javafx.scene.CacheHint;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.effect.BlendMode;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
+import javafx.scene.image.PixelFormat;
 import javafx.scene.input.TouchPoint;
-import javafx.scene.paint.Color;
 
 /**
  *
  * @author patri
  */
-public class RendererFX extends Canvas implements Runnable {
+public class RendererFX extends Canvas {
 
     private boolean running;
     private int[] pixels;
@@ -34,7 +29,6 @@ public class RendererFX extends Canvas implements Runnable {
     private Texture ceiling;
     private Camera camera;
     private Screen screen;
-    private Thread thread;
     private TreeMap<String, Teleport> teleports;
     private int[][] map;
     private long startTime = System.currentTimeMillis();
@@ -45,17 +39,21 @@ public class RendererFX extends Canvas implements Runnable {
     private int deltaSteps = 0;
     private int deltaStepsDir = 1;
     private static final int STEPHEIGHT = 3;
-    
-        private java.util.prefs.Preferences preferences;
-
+    private AnimationTimer timer;
+    GraphicsContext g = getGraphicsContext2D();
+    PixelFormat<IntBuffer> pixelFormat = PixelFormat.getIntArgbInstance();
 
     public RendererFX(RoomFile file, Message listener, ArrayList<Sprite> userSprites) {
         this.userSprites = userSprites;
+        pixels = new int[(Texture.SIZE * 4 / 3) * Texture.SIZE];
         textures = file.getTextures();
         floor = file.getFloor();
         ceiling = file.getCeiling();
         map = file.getMap();
         this.listener = listener;
+//        setCacheHint(CacheHint.SCALE);
+//        setCache(true);
+//        
         double startX = file.getStartX();
         double startY = file.getStartY();
         if (startX == -1) {
@@ -154,13 +152,10 @@ public class RendererFX extends Canvas implements Runnable {
             map[y][x] = textures.size();
         }
         camera = new Camera(startX, startY, 1, 0, 0, -.66, listener);
-        //screen = new Screen(map, textures, getWidth() - STEPHEIGHT, getHeight() - STEPHEIGHT, floor, ceiling, sprites,userSprites);
         int height = 512;
         int width = height * 4 / 3;
         pixels = new int[width * height];
         screen = new Screen(map, textures, width, height, floor, ceiling, sprites, userSprites);
-        thread = new Thread(this);
-        //addKeyListener(camera);
         setOnKeyPressed((event) -> {
             requestFocus();
             switch (event.getCode()) {
@@ -266,7 +261,12 @@ public class RendererFX extends Canvas implements Runnable {
         setFocused(true);
         setWidth(width);
         setHeight(height);
-        setCache(true);
+        timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                paint();
+            }
+        };
         running = true;
         requestFocus();
     }
@@ -349,7 +349,7 @@ public class RendererFX extends Canvas implements Runnable {
 
     public synchronized void start() {
         running = true;
-        thread.start();
+        timer.start();
     }
 
     public synchronized void stop() {
@@ -357,11 +357,7 @@ public class RendererFX extends Canvas implements Runnable {
         for (Texture t : textures) {
             t.stop();
         }
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        timer.stop();
     }
 
     public void addMessage(String msg) {
@@ -371,55 +367,24 @@ public class RendererFX extends Canvas implements Runnable {
         }
     }
 
-    private long lastFPSCount = System.currentTimeMillis();
-    private long imageCountFPS = 0;
-    private long fps = 0;
-
-    @Override
-    public void run() {
-        startTime = System.currentTimeMillis();
-        long nextPTR = System.currentTimeMillis() + 30;
-        BufferedImage image = new BufferedImage(Texture.SIZE * 4 / 3, Texture.SIZE, BufferedImage.TYPE_INT_ARGB);
-        pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-        WritableImage wimg = new WritableImage(image.getWidth(), image.getHeight());
-        GraphicsContext g = getGraphicsContext2D();
-        while (running) {
-
-            long wait = nextPTR - System.currentTimeMillis();
-            if (wait > 0) {
-                try {
-                    Thread.sleep(wait);
-                } catch (InterruptedException ex) {
-                }
-            }
-            nextPTR = System.currentTimeMillis() + 15;
+    private void paint() {
+        int width = (Texture.SIZE * 4 / 3);
+        try {
             try {
-                try {
-                    screen.update(camera, pixels);
-                } catch (Exception ex) {
-                    System.err.println("ERROR: " + ex.getMessage());
-                }
-                camera.update(map);
-                //draw Pixels
-
-                SwingFXUtils.toFXImage(image, wimg);
-                g.fillRect(0, 0, widthProperty().doubleValue(), heightProperty().doubleValue());
-                g.drawImage(wimg, 0, 0);
-
+                screen.update(camera, pixels);
             } catch (Exception ex) {
                 System.err.println("ERROR: " + ex.getMessage());
             }
-            imageCountFPS++;
-            if (System.currentTimeMillis() - lastFPSCount >= 1000) {
-                fps = imageCountFPS;
-                imageCountFPS = 0;
-                lastFPSCount = System.currentTimeMillis();
-                //adjust camera speed
-                camera.MOVE_SPEED = Math.PI / fps / 2D;
-                camera.ROTATION_SPEED = Math.PI / fps / 3.5D;
-                //System.out.println("FPS: " + fps);
-            }
-        }
-    }
+            camera.update(map);
+            //draw Pixels
+            //SwingFXUtils.toFXImage(image, wimg);
+            //g.fillRect(0, 0, width, Texture.SIZE);
+            g.getPixelWriter().setPixels(0, 0, width, Texture.SIZE, pixelFormat, pixels, 0, width);
+            //g.drawImage(wimg, 0, 0);
 
+        } catch (Exception ex) {
+            System.err.println("ERROR: " + ex.getMessage());
+        }
+
+    }
 }
