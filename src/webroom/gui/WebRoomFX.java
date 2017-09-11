@@ -5,7 +5,6 @@
  */
 package webroom.gui;
 
-import java.awt.SplashScreen;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +19,7 @@ import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -40,6 +40,8 @@ import javafx.stage.Stage;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JComponent;
 import org.schwering.irc.lib.IRCConfig;
 import org.schwering.irc.lib.IRCConfigBuilder;
@@ -69,6 +71,7 @@ public class WebRoomFX extends Application implements Message {
     private Button btnBackToMap;
     private Button btnOpenFile;
     private Stage stage;
+    private StackPane root;
     private Label lblMessage;
     private java.util.prefs.Preferences preferences;
     private IRCConnection irc;
@@ -79,6 +82,7 @@ public class WebRoomFX extends Application implements Message {
     private ArrayList<Sprite> userSprites = new ArrayList<>();
     private Texture userImage;
     private TextField txtChat;
+    private Clip bgSound = null;
 
     @Override
     public void start(Stage primaryStage) throws KeyManagementException, NoSuchAlgorithmException {
@@ -105,12 +109,20 @@ public class WebRoomFX extends Application implements Message {
             btnBackToMap = new Button("<--");
             btnBackToMap.setDisable(true);
             btnBackToMap.setOnAction((event) -> {
-                WebView web = (WebView) panel.getCenter();
-                web.getEngine().loadContent("<html><body><</body></html>");
-                panel.setCenter(renderer);
+                WebView web = null;
+                for (Node n : root.getChildren()) {
+                    if (n instanceof WebView) {
+                        web = (WebView) n;
+                        break;
+                    }
+                }
+                if (web != null) {
+                    web.getEngine().loadContent("<html><body><</body></html>");
+                    root.getChildren().remove(web);
+                }
                 btnBackToMap.setDisable(true);
                 renderer.requestFocus();
-                renderer.toBack();
+                renderer.pause();
             });
 
             btnOpenFile = new Button("...");
@@ -160,7 +172,7 @@ public class WebRoomFX extends Application implements Message {
 
             bottomPanel = new VBox(0, lblMessage, txtChat);
 
-            StackPane root = new StackPane();
+            root = new StackPane();
             root.getChildren().add(panel);
             Scene scene = new Scene(root, 800, 512 + 80);
             stage = primaryStage;
@@ -241,10 +253,33 @@ public class WebRoomFX extends Application implements Message {
         chatroom = file.getChatroom();
         chatPort = file.getChatPort();
         userSprites.clear();
+
         if (irc == null) {
             connectToIRC();
         } else {
             irc.doJoin(chatroom);
+        }
+        playBackgroundSound(file.getBackgroundSound());
+    }
+
+    private void playBackgroundSound(URL url) {
+        try {
+            if (bgSound != null) {
+                bgSound.stop();
+                bgSound = null;
+            }
+            if (url != null) {
+                bgSound = AudioSystem.getClip();
+                bgSound.open(AudioSystem.getAudioInputStream(url));
+                bgSound.start();
+                bgSound.loop(Clip.LOOP_CONTINUOUSLY);
+            }
+        } catch (UnsupportedAudioFileException ex) {
+            Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (LineUnavailableException ex) {
+            Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -274,8 +309,10 @@ public class WebRoomFX extends Application implements Message {
         if (mediaTexture != null) {
             if (mediaTexture.isMediaPlaying()) {
                 mediaTexture.stopMedia();
+                playBackgroundSound(currentFile.getBackgroundSound());
             } else {
                 mediaTexture.playMedia();
+                playBackgroundSound(null);
             }
         }
         if (currentFile.getSounds().containsKey(loc)) {
@@ -314,8 +351,10 @@ public class WebRoomFX extends Application implements Message {
                     if (s.texture.hasMedia()) {
                         if (s.texture.isMediaPlaying()) {
                             s.texture.stopMedia();
+                            playBackgroundSound(currentFile.getBackgroundSound());
                         } else {
                             s.texture.playMedia();
+                            playBackgroundSound(null);
                         }
                     }
                     break;
@@ -325,26 +364,34 @@ public class WebRoomFX extends Application implements Message {
         if (currentFile.getWebPages().containsKey(loc)) {
             URL url = currentFile.getWebPages().get(loc);
             if (renderer.isVisible()) {
+                renderer.pause();
+                playBackgroundSound(null);
                 WebView web = new WebView();
                 btnBackToMap.setDisable(false);
                 web.getEngine().load(url.toString());
                 web.setOnKeyPressed((event) -> {
                     if (event.getCode() == KeyCode.ESCAPE) {
                         web.getEngine().loadContent("<html><body></body></html>");
-                        panel.setCenter(renderer);
+                        root.getChildren().remove(web);
                         renderer.requestFocus();
-                        renderer.toBack();
                         btnBackToMap.setDisable(true);
+                        playBackgroundSound(currentFile.getBackgroundSound());
+                        renderer.pause();
+
                     }
                 });
-                panel.setCenter(web);
+                root.getChildren().add(web);
+                web.toFront();
                 web.requestFocus();
-                topPanel.toFront();
+                web.setScaleX(0.95);
+                web.setScaleY(0.85);
             }
         }
         if (currentFile.getEmbeded().containsKey(loc)) {
             String content = currentFile.getEmbeded().get(loc);
             if (renderer.isVisible()) {
+                renderer.pause();
+                playBackgroundSound(null);
                 WebView web = new WebView();
                 btnBackToMap.setDisable(false);
                 if (content.startsWith("youtube=")) {
@@ -359,15 +406,19 @@ public class WebRoomFX extends Application implements Message {
                 web.setOnKeyPressed((event) -> {
                     if (event.getCode() == KeyCode.ESCAPE) {
                         web.getEngine().loadContent("<html><body></body></html>");
-                        panel.setCenter(renderer);
+                        root.getChildren().remove(web);
                         renderer.requestFocus();
-                        renderer.toBack();
                         btnBackToMap.setDisable(true);
+                        playBackgroundSound(currentFile.getBackgroundSound());
+                        renderer.pause();
                     }
                 });
-                panel.setCenter(web);
+
+                root.getChildren().add(web);
+                web.toFront();
+                web.setScaleX(0.95);
+                web.setScaleY(0.85);
                 web.requestFocus();
-                topPanel.toFront();
             }
         }
         if (currentFile.getDoors().containsKey(loc)) {
