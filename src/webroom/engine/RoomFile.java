@@ -151,7 +151,14 @@ public class RoomFile {
                 String text[] = line.replaceFirst("text=", "").split(",");
                 if (text.length == 3) {
                     //Text is on a single ligne...
-                    texts.put(text[0] + "," + text[1], text[2]);
+                    String singletext = text[2].trim();
+                    if (singletext.toLowerCase().startsWith("youtube=")){
+                        //we have a youtube video to embed...
+                        String key = singletext.substring(singletext.indexOf("=")+1);
+                        singletext = "<div style='text-align:center;'><img src='http://img.youtube.com/vi/"+key+"/0.jpg' width="+Texture.SIZE+" height="+Texture.SIZE+"></div>";
+                        embeded.put(text[0] + "," + text[1], text[2].trim());
+                    }
+                    texts.put(text[0] + "," + text[1], singletext);
                 } else {
                     //Text is on multiple lines....
                     String key = (text[0] + "," + text[1]).trim();

@@ -14,6 +14,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.input.TouchPoint;
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -44,6 +45,9 @@ public class RendererFX extends Canvas {
     private long lastTouchPressed = 0;
 
     public RendererFX() {
+        GraphicsContext g = getGraphicsContext2D();
+        g.setFill(Color.BLACK);
+        g.fill();
         setOnKeyPressed((event) -> {
             if (camera != null) {
 
@@ -395,6 +399,9 @@ public class RendererFX extends Canvas {
             }
             timer.stop();
         }
+        GraphicsContext g = getGraphicsContext2D();
+        g.setFill(Color.BLACK);
+        g.fill();
     }
 
     public void addMessage(String msg) {
@@ -407,6 +414,18 @@ public class RendererFX extends Canvas {
     private double frameCount = 0;
     private double fps = 0;
     private long lastCountTime = System.currentTimeMillis();
+
+    public void pause() {
+        if (running){
+            running = false;
+            timer.stop();
+        } else {
+            running=true;
+            timer.start();
+        }
+        lastCountTime = System.currentTimeMillis();
+        frameCount=0;
+    }
 
     private void paint() {
         int width = (Texture.SIZE * 4 / 3);
