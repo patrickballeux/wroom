@@ -163,25 +163,21 @@ public class RendererFX extends Canvas {
                     camera.right = false;
                 }
             }
-
-            event.consume();
-        }
-        );
-        setOnTouchStationary(
-                (event) -> {
-                    if (camera != null) {
-                        if (lastTouched.getY() + 30 < event.getTouchPoint().getY()) {
-                            camera.forward = false;
-                            camera.back = true;
-                        }
-                        if (lastTouched.getY() - 30 > event.getTouchPoint().getY()) {
-                            camera.back = false;
-                            camera.forward = true;
-                        }
-                    }
-                    event.consume();
+           event.consume();
+        });
+        setOnTouchStationary((event) -> {
+            if (camera != null && lastTouched != null) {
+                if (lastTouched.getY() + 30 < event.getTouchPoint().getY()) {
+                    camera.forward = false;
+                    camera.back = true;
                 }
-        );
+                if (lastTouched.getY() - 30 > event.getTouchPoint().getY()) {
+                    camera.back = false;
+                    camera.forward = true;
+                }
+            }
+            event.consume();
+        });
         setFocused(
                 true);
         int height = 512;
@@ -203,6 +199,10 @@ public class RendererFX extends Canvas {
     }
 
     TouchPoint lastTouched;
+
+    public boolean isRunning() {
+        return running;
+    }
 
     private void sendOnAction(double cameraX) {
         double rayDirX = camera.xDir + camera.xPlane * cameraX;
@@ -416,15 +416,15 @@ public class RendererFX extends Canvas {
     private long lastCountTime = System.currentTimeMillis();
 
     public void pause() {
-        if (running){
+        if (running) {
             running = false;
             timer.stop();
         } else {
-            running=true;
+            running = true;
             timer.start();
         }
         lastCountTime = System.currentTimeMillis();
-        frameCount=0;
+        frameCount = 0;
     }
 
     private void paint() {

@@ -18,11 +18,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
@@ -68,7 +72,6 @@ public class WebRoomFX extends Application implements Message {
     private ToolBar topPanel;
     private VBox bottomPanel;
     private RoomFile currentFile;
-    private Button btnBackToMap;
     private Button btnOpenFile;
     private Stage stage;
     private StackPane root;
@@ -83,50 +86,47 @@ public class WebRoomFX extends Application implements Message {
     private Texture userImage;
     private TextField txtChat;
     private Clip bgSound = null;
+    private ObservableList<String> itemHistories;
+    private ListView<String> listHistories;
 
     @Override
     public void start(Stage primaryStage) throws KeyManagementException, NoSuchAlgorithmException {
         preferences = java.util.prefs.Preferences.userNodeForPackage(this.getClass());
         userImage = new Texture(getClass().getResource("/webroom/engine/user.png"));
-        try {
-            panel = new BorderPane();
+        panel = new BorderPane();
 
-            // Top Panel
-            Button btnBrowse = new Button("Go");
-            btnBrowse.setOnAction((event) -> {
-                try {
-                    loadRoom();
-                } catch (IOException ex) {
-                    Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (KeyManagementException ex) {
-                    Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (NoSuchAlgorithmException ex) {
-                    Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            });
-            txtURL = new TextField("http://wroom.crombz.com");
-            txtURL.setPrefWidth(400);
-            btnBackToMap = new Button("<--");
-            btnBackToMap.setDisable(true);
-            btnBackToMap.setOnAction((event) -> {
-                WebView web = null;
-                for (Node n : root.getChildren()) {
-                    if (n instanceof WebView) {
-                        web = (WebView) n;
-                        break;
-                    }
-                }
-                if (web != null) {
-                    web.getEngine().loadContent("<html><body><</body></html>");
-                    root.getChildren().remove(web);
-                }
-                btnBackToMap.setDisable(true);
-                renderer.requestFocus();
-                renderer.pause();
-            });
+        // Top Panel
+        Button btnBrowse = new Button("Go");
+        btnBrowse.setOnAction((event) -> {
+            loadRoom();
+        });
+        txtURL = new TextField("http://wroom.crombz.com");
+        txtURL.setPrefWidth(400);
+        txtURL.setOnKeyPressed((event) -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                loadRoom();
+                event.consume();
+            }
+        });
 
-            btnOpenFile = new Button("...");
-            btnOpenFile.setOnAction((event) -> {
+        listHistories = new javafx.scene.control.ListView<>();
+        listHistories.setStyle("-fx-font-size:16 px;-fx-border: 25px 25px 25px 25px; -fx-border-color: red;");
+        itemHistories = FXCollections.observableArrayList("http://wroom.crombz.com");
+        listHistories.setItems(itemHistories);
+        listHistories.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        listHistories.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            txtURL.setText(newValue);
+            root.getChildren().remove(listHistories);
+        });
+        listHistories.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue && !newValue) {
+                root.getChildren().remove(listHistories);
+            }
+        });
+
+        btnOpenFile = new Button("...");
+        btnOpenFile.setOnAction((event) -> {
+            if (false && WebRoom.NOCHAT) {
                 javafx.stage.FileChooser chooser = new FileChooser();
                 chooser.setInitialDirectory(new File("."));
                 chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("WRM files", "wrm"));
@@ -137,129 +137,157 @@ public class WebRoomFX extends Application implements Message {
                     } catch (MalformedURLException ex) {
                         Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    try {
-                        loadRoom();
-                    } catch (IOException ex) {
-                        Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (KeyManagementException ex) {
-                        Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (NoSuchAlgorithmException ex) {
-                        Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    loadRoom();
                 }
-            });
-            topPanel = new ToolBar(btnBrowse, txtURL, btnOpenFile, btnBackToMap);
+            } else {
+                //show history...
+                root.getChildren().add(listHistories);
+                listHistories.toFront();
+                listHistories.setMaxWidth(400);
+                listHistories.setMaxHeight(400);
+                listHistories.requestFocus();
+            }
+        });
 
-            lblMessage = new Label("Welcome!");
-            lblMessage.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, FontPosture.REGULAR, 12));
-            lblMessage.setTextFill(Color.RED);
-            lblMessage.setStyle("-fx-padding:10;-fx-background-color: #ffffff;-fx-border-radius: 10 10 0 0;-fx-background-radius: 10 10 0 0;");
-            lblMessage.setAlignment(Pos.CENTER);
-            lblMessage.setOpacity(0.9);
-            txtChat = new TextField();
-            txtChat.setDisable(false);
-            txtChat.setOpacity(0.8);
-            txtChat.setOnKeyPressed((event) -> {
-                if (event.getCode() == KeyCode.ENTER) {
-                    if (irc != null) {
-                        irc.doPrivmsg(chatroom, txtChat.getText().trim());
-                        lblMessage.setText("Me: " + txtChat.getText().trim());
-                        txtChat.setText("");
-                        renderer.requestFocus();
-                    }
-                }
-            });
+        topPanel = new ToolBar(btnBrowse, txtURL, btnOpenFile);
 
-            bottomPanel = new VBox(0, lblMessage, txtChat);
-
-            root = new StackPane();
-            root.getChildren().add(panel);
-            Scene scene = new Scene(root, 800, 512 + 80);
-            stage = primaryStage;
-            primaryStage.setMinHeight(512 + 40);
-            primaryStage.setMinWidth(800);
-            primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("logo.png")));
-            primaryStage.setTitle("WRoom " + WebRoom.VERSION);
-            panel.setTop(topPanel);
-            renderer = new RendererFX();
-            loadRoom();
-            panel.setCenter(renderer);
-            panel.setBottom(bottomPanel);
-            topPanel.toFront();
-            renderer.toBack();;
-            primaryStage.setScene(scene);
-            primaryStage.widthProperty().addListener((observable) -> {
-                double scaleX = primaryStage.widthProperty().doubleValue() / renderer.widthProperty().doubleValue();
-                double scaleY = (primaryStage.heightProperty().doubleValue() + 50) / renderer.heightProperty().doubleValue();;
-                if (scaleX >= scaleY) {
-                    renderer.setScaleX(scaleX);
-                    renderer.setScaleY(scaleX);
-                } else {
-                    renderer.setScaleX(scaleY);
-                    renderer.setScaleY(scaleY);
-                }
-                topPanel.autosize();
-                topPanel.setLayoutX((primaryStage.widthProperty().doubleValue() - topPanel.widthProperty().doubleValue()) / 2);
-            });
-            primaryStage.heightProperty().addListener((observable) -> {
-                double scaleX = primaryStage.widthProperty().doubleValue() / renderer.widthProperty().doubleValue();
-                double scaleY = (primaryStage.heightProperty().doubleValue() + 50) / renderer.heightProperty().doubleValue();
-                if (scaleX >= scaleY) {
-                    renderer.setScaleX(scaleX);
-                    renderer.setScaleY(scaleX);
-                } else {
-                    renderer.setScaleX(scaleY);
-                    renderer.setScaleY(scaleY);
-                }
-
-            });
-            primaryStage.show();
-            primaryStage.setOnCloseRequest((event) -> {
-                if (renderer != null) {
-                    renderer.stop();
-                }
+        lblMessage = new Label("Welcome!");
+        lblMessage.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, FontPosture.REGULAR, 12));
+        lblMessage.setTextFill(Color.RED);
+        lblMessage.setStyle("-fx-padding:10;-fx-background-color: #ffffff;-fx-border-radius: 10 10 0 0;-fx-background-radius: 10 10 0 0;");
+        lblMessage.setAlignment(Pos.CENTER);
+        lblMessage.setOpacity(0.9);
+        txtChat = new TextField();
+        txtChat.setDisable(false);
+        txtChat.setOpacity(0.8);
+        txtChat.setOnKeyPressed((event) -> {
+            if (event.getCode() == KeyCode.ENTER) {
                 if (irc != null) {
-                    irc.close();
-                    irc = null;
+                    irc.doPrivmsg(chatroom, txtChat.getText().trim());
+                    lblMessage.setText("Me: " + txtChat.getText().trim());
+                    txtChat.setText("");
+                    renderer.requestFocus();
                 }
-            });
+            }
+        });
 
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        bottomPanel = new VBox(0, lblMessage, txtChat);
 
-    }
+        root = new StackPane();
+        root.getChildren().add(panel);
+        Scene scene = new Scene(root, 800, 512 + 80);
+        stage = primaryStage;
+        primaryStage.setMinHeight(512 + 40);
+        primaryStage.setMinWidth(800);
+        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("logo.png")));
+        primaryStage.setTitle("WRoom " + WebRoom.VERSION);
+        panel.setTop(topPanel);
+        renderer = new RendererFX();
+        loadRoom();
+        panel.setCenter(renderer);
+        panel.setBottom(bottomPanel);
+        topPanel.toFront();
+        renderer.toBack();;
+        renderer.setOnSwipeDown((event) -> {
+            if (!renderer.isRunning()) {
+                WebView web = null;
+                for (Node n : root.getChildren()) {
+                    if (n instanceof WebView) {
+                        web = (WebView) n;
+                        break;
+                    }
+                }
+                if (web != null) {
+                    web.getEngine().loadContent("<html><body><</body></html>");
+                    root.getChildren().remove(web);
+                    renderer.pause();
+                }
+                event.consume();
+                renderer.requestFocus();
+            }
+        });
+        primaryStage.setScene(scene);
+        primaryStage.widthProperty().addListener((observable) -> {
+            double scaleX = primaryStage.widthProperty().doubleValue() / renderer.widthProperty().doubleValue();
+            double scaleY = (primaryStage.heightProperty().doubleValue() + 50) / renderer.heightProperty().doubleValue();;
+            if (scaleX >= scaleY) {
+                renderer.setScaleX(scaleX);
+                renderer.setScaleY(scaleX);
+            } else {
+                renderer.setScaleX(scaleY);
+                renderer.setScaleY(scaleY);
+            }
+            topPanel.autosize();
+            topPanel.setLayoutX((primaryStage.widthProperty().doubleValue() - topPanel.widthProperty().doubleValue()) / 2);
+        });
+        primaryStage.heightProperty().addListener((observable) -> {
+            double scaleX = primaryStage.widthProperty().doubleValue() / renderer.widthProperty().doubleValue();
+            double scaleY = (primaryStage.heightProperty().doubleValue() + 50) / renderer.heightProperty().doubleValue();
+            if (scaleX >= scaleY) {
+                renderer.setScaleX(scaleX);
+                renderer.setScaleY(scaleX);
+            } else {
+                renderer.setScaleX(scaleY);
+                renderer.setScaleY(scaleY);
+            }
 
-    private void loadRoom() throws MalformedURLException, IOException, KeyManagementException, NoSuchAlgorithmException {
-        RoomFile file = new RoomFile(new URL(txtURL.getText()), this);
-        if (irc != null) {
-            irc.doPart(chatroom);
-            if (!file.getChatHost().equals(chatHost)) {
-                irc.doQuit();
+        });
+        primaryStage.show();
+        primaryStage.setOnCloseRequest((event) -> {
+            if (renderer != null) {
+                renderer.stop();
+            }
+            if (irc != null) {
+                irc.close();
                 irc = null;
             }
-        }
-        currentFile = file;
-        renderer.stop();
-        renderer.start(file, this, userSprites);
-        renderer.setScaleX(panel.widthProperty().doubleValue() / renderer.widthProperty().doubleValue());
-        renderer.setScaleY(panel.widthProperty().doubleValue() / renderer.widthProperty().doubleValue());
-        renderer.requestFocus();
-        stage.setTitle("WRoom " + WebRoom.VERSION + " - " + file.getTitle());
-        updateLabelMessage("Welcome to " + file.getTitle().trim());
-        chatHost = file.getChatHost();
-        chatroom = file.getChatroom();
-        chatPort = file.getChatPort();
-        userSprites.clear();
+        });
+    }
 
-        if (irc == null) {
-            connectToIRC();
-        } else {
-            irc.doJoin(chatroom);
+    private void loadRoom() {
+        try {
+            RoomFile file = new RoomFile(new URL(txtURL.getText()), this);
+            if (itemHistories.size() > 30) {
+                itemHistories.remove(itemHistories.size() - 1);
+            }
+            if (!itemHistories.contains(txtURL.getText())) {
+                itemHistories.add(0, txtURL.getText());
+            }
+            if (irc != null) {
+                irc.doPart(chatroom);
+                if (!file.getChatHost().equals(chatHost)) {
+                    irc.doQuit();
+                    irc = null;
+                }
+            }
+            currentFile = file;
+            renderer.stop();
+            renderer.start(file, this, userSprites);
+            renderer.setScaleX(panel.widthProperty().doubleValue() / renderer.widthProperty().doubleValue());
+            renderer.setScaleY(panel.widthProperty().doubleValue() / renderer.widthProperty().doubleValue());
+            renderer.requestFocus();
+            stage.setTitle("WRoom " + WebRoom.VERSION + " - " + file.getTitle());
+            updateLabelMessage("Welcome to " + file.getTitle().trim());
+            chatHost = file.getChatHost();
+            chatroom = file.getChatroom();
+            chatPort = file.getChatPort();
+            userSprites.clear();
+
+            if (irc == null) {
+                connectToIRC();
+            } else {
+                irc.doJoin(chatroom);
+            }
+            playBackgroundSound(file.getBackgroundSound());
+        } catch (MalformedURLException ex) {
+            lblMessage.setText("!!URL is invalid!!");
+        } catch (IOException ex) {
+            lblMessage.setText("!!Could not load map!!");
+            System.err.println(ex.getMessage());
+        } catch (Exception ex) {
+            lblMessage.setText("!!Something went wrong!!");
+            System.err.println(ex.getMessage());
         }
-        playBackgroundSound(file.getBackgroundSound());
     }
 
     private void playBackgroundSound(URL url) {
@@ -320,15 +348,7 @@ public class WebRoomFX extends Application implements Message {
         }
         if (currentFile.getTeleports().containsKey(loc)) {
             txtURL.setText(currentFile.getTeleports().get(loc).base.toString());
-            try {
-                loadRoom();
-            } catch (IOException ex) {
-                Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (KeyManagementException ex) {
-                Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchAlgorithmException ex) {
-                Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            loadRoom();
             return;
         }
         if (currentFile.getNotifications().containsKey(loc)) {
@@ -367,17 +387,14 @@ public class WebRoomFX extends Application implements Message {
                 renderer.pause();
                 playBackgroundSound(null);
                 WebView web = new WebView();
-                btnBackToMap.setDisable(false);
                 web.getEngine().load(url.toString());
-                web.setOnKeyPressed((event) -> {
-                    if (event.getCode() == KeyCode.ESCAPE) {
+                web.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                    if (oldValue && !newValue) {
                         web.getEngine().loadContent("<html><body></body></html>");
                         root.getChildren().remove(web);
                         renderer.requestFocus();
-                        btnBackToMap.setDisable(true);
                         playBackgroundSound(currentFile.getBackgroundSound());
                         renderer.pause();
-
                     }
                 });
                 root.getChildren().add(web);
@@ -393,7 +410,6 @@ public class WebRoomFX extends Application implements Message {
                 renderer.pause();
                 playBackgroundSound(null);
                 WebView web = new WebView();
-                btnBackToMap.setDisable(false);
                 if (content.startsWith("youtube=")) {
                     content = content.replaceFirst("youtube=", "");
                     content = "<iframe width=\"100%\" height=\"100%\" src='https://www.youtube.com/embed/" + content + "?autoplay=1' frameborder=\"0\" allowfullscreen></iframe>";
@@ -403,12 +419,11 @@ public class WebRoomFX extends Application implements Message {
                 }
                 String html = "<html><body>" + content + "</body></html>";
                 web.getEngine().loadContent(html);
-                web.setOnKeyPressed((event) -> {
-                    if (event.getCode() == KeyCode.ESCAPE) {
+                web.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                    if (oldValue && !newValue) {
                         web.getEngine().loadContent("<html><body></body></html>");
                         root.getChildren().remove(web);
                         renderer.requestFocus();
-                        btnBackToMap.setDisable(true);
                         playBackgroundSound(currentFile.getBackgroundSound());
                         renderer.pause();
                     }
