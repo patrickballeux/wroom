@@ -85,7 +85,6 @@ public class RendererFX extends Canvas {
 
         setOnMouseClicked((event) -> {
             if (camera != null) {
-
                 requestFocus();
                 if (event.getClickCount() == 2) {
                     sendOnAction(event.getX());
@@ -96,7 +95,6 @@ public class RendererFX extends Canvas {
 
         setOnKeyReleased((event) -> {
             if (camera != null) {
-
                 switch (event.getCode()) {
                     case LEFT:
                     case A:
@@ -129,10 +127,8 @@ public class RendererFX extends Canvas {
         });
         setOnTouchPressed((event) -> {
             if (camera != null) {
-                if (lastTouched != null) {
-                    if (System.currentTimeMillis() - lastTouchPressed < 300) {
-                        sendOnAction(0);
-                    }
+                if (System.currentTimeMillis() - lastTouchPressed < 500) {
+                    sendOnAction(0);
                 }
                 lastTouchPressed = System.currentTimeMillis();
                 lastTouched = event.getTouchPoint();
@@ -146,46 +142,44 @@ public class RendererFX extends Canvas {
                 camera.right = false;
                 camera.forward = false;
                 camera.back = false;
-                lastTouched = event.getTouchPoint();
+                lastTouched = null;
             }
             event.consume();
         });
         setOnTouchMoved((event) -> {
             if (camera != null) {
-                if (lastTouched.getX() + 30 < event.getTouchPoint().getX()) {
+                if (lastTouched.getX() + 50 < event.getTouchPoint().getX()) {
                     camera.right = true;
                     camera.left = false;
-                } else if (lastTouched.getX() - 30 > event.getTouchPoint().getX()) {
+                } else if (lastTouched.getX() - 50 > event.getTouchPoint().getX()) {
                     camera.left = true;
                     camera.right = false;
                 } else {
                     camera.left = false;
                     camera.right = false;
                 }
-            }
-           event.consume();
-        });
-        setOnTouchStationary((event) -> {
-            if (camera != null && lastTouched != null) {
-                if (lastTouched.getY() + 30 < event.getTouchPoint().getY()) {
+                if (lastTouched.getY() + 50 < event.getTouchPoint().getY()) {
                     camera.forward = false;
                     camera.back = true;
-                }
-                if (lastTouched.getY() - 30 > event.getTouchPoint().getY()) {
+                } else if (lastTouched.getY() - 50 > event.getTouchPoint().getY()) {
                     camera.back = false;
                     camera.forward = true;
+                } else {
+                    camera.back = false;
+                    camera.forward = false;
                 }
             }
             event.consume();
         });
-        setFocused(
-                true);
+        setOnTouchStationary((event) -> {
+            //do nothing and consume the event...
+            event.consume();
+        });
+        setFocused(true);
         int height = 512;
         int width = height * 4 / 3;
         pixels = new int[width * height];
-
         setWidth(width);
-
         setHeight(height);
         timer = new AnimationTimer() {
             @Override
@@ -388,6 +382,8 @@ public class RendererFX extends Canvas {
         camera = new Camera(startX, startY, 1, 0, 0, -.66, listener);
         screen = new Screen(map, textures, Texture.SIZE * 4 / 3, Texture.SIZE, floor, ceiling, sprites, userSprites);
         running = true;
+        lastCountTime = System.currentTimeMillis();
+        frameCount = 0;
         timer.start();
     }
 
@@ -427,6 +423,8 @@ public class RendererFX extends Canvas {
         frameCount = 0;
     }
 
+    private Color touchedCircle = new Color(1, 1, 1, 0.5);
+
     private void paint() {
         int width = (Texture.SIZE * 4 / 3);
         try {
@@ -438,6 +436,11 @@ public class RendererFX extends Canvas {
             camera.update(map);
             //draw Pixels
             g.getPixelWriter().setPixels(0, 0, width, Texture.SIZE, pixelFormat, pixels, 0, width);
+            TouchPoint p = lastTouched;
+            if (p != null) {
+                g.setFill(touchedCircle);
+                g.fillOval(p.getX() - 25, p.getY() - 25, 50, 50);
+            }
             frameCount++;
             if (frameCount >= 30) {
                 double delta = (System.currentTimeMillis() - lastCountTime) / 1000D;

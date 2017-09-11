@@ -242,6 +242,7 @@ public class WebRoomFX extends Application implements Message {
                 irc = null;
             }
         });
+        renderer.requestFocus();
     }
 
     private void loadRoom() {
