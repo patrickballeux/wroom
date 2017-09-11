@@ -111,7 +111,11 @@ public class RoomFile {
                 switch (action[0].trim()) {
                     case "teleport":
                         Teleport t = new Teleport();
-                        t.base = new URL(action[3].trim());
+                        String target = action[3].trim();
+                        if (!target.toLowerCase().startsWith("http")) {
+                            target = base.toString() + "/" + target;
+                        }
+                        t.base = new URL(target);
                         teleports.put((action[1] + "," + action[2]).trim(), t);
                         if (action.length == 5) {
                             t.title = action[4];
@@ -152,11 +156,11 @@ public class RoomFile {
                     //Text is on multiple lines....
                     String key = (text[0] + "," + text[1]).trim();
                     String textContent = "";
-                    for (int i = lineIndex+1; i < lines.length; i++) {
+                    for (int i = lineIndex + 1; i < lines.length; i++) {
                         if (!lines[i].trim().toLowerCase().equals("=text")) {
                             textContent += lines[i].trim();
                         } else {
-                            lineIndex = i-1;
+                            lineIndex = i - 1;
                             break;
                         }
                     }

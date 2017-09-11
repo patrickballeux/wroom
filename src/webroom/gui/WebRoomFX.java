@@ -137,7 +137,6 @@ public class WebRoomFX extends Application implements Message {
                 }
             });
             topPanel = new ToolBar(btnBrowse, txtURL, btnOpenFile, btnBackToMap);
-            panel.setTop(topPanel);
 
             lblMessage = new Label("Welcome!");
             lblMessage.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, FontPosture.REGULAR, 12));
@@ -169,10 +168,13 @@ public class WebRoomFX extends Application implements Message {
             primaryStage.setMinWidth(800);
             primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("logo.png")));
             primaryStage.setTitle("WRoom " + WebRoom.VERSION);
+            panel.setTop(topPanel);
+            renderer = new RendererFX();
             loadRoom();
-            //Bottom panel            
+            panel.setCenter(renderer);
             panel.setBottom(bottomPanel);
-
+            topPanel.toFront();
+            renderer.toBack();;
             primaryStage.setScene(scene);
             primaryStage.widthProperty().addListener((observable) -> {
                 double scaleX = primaryStage.widthProperty().doubleValue() / renderer.widthProperty().doubleValue();
@@ -184,13 +186,12 @@ public class WebRoomFX extends Application implements Message {
                     renderer.setScaleX(scaleY);
                     renderer.setScaleY(scaleY);
                 }
-
                 topPanel.autosize();
                 topPanel.setLayoutX((primaryStage.widthProperty().doubleValue() - topPanel.widthProperty().doubleValue()) / 2);
             });
             primaryStage.heightProperty().addListener((observable) -> {
                 double scaleX = primaryStage.widthProperty().doubleValue() / renderer.widthProperty().doubleValue();
-                double scaleY = (primaryStage.heightProperty().doubleValue() + 50) / renderer.heightProperty().doubleValue();;
+                double scaleY = (primaryStage.heightProperty().doubleValue() + 50) / renderer.heightProperty().doubleValue();
                 if (scaleX >= scaleY) {
                     renderer.setScaleX(scaleX);
                     renderer.setScaleY(scaleX);
@@ -198,6 +199,7 @@ public class WebRoomFX extends Application implements Message {
                     renderer.setScaleX(scaleY);
                     renderer.setScaleY(scaleY);
                 }
+
             });
             primaryStage.show();
             primaryStage.setOnCloseRequest((event) -> {
@@ -228,20 +230,13 @@ public class WebRoomFX extends Application implements Message {
             }
         }
         currentFile = file;
-        if (renderer != null) {
-            renderer.stop();
-            panel.getChildren().remove(renderer);
-        }
-        renderer = new RendererFX(file, this, userSprites);
-        panel.setCenter(renderer);
-        renderer.start();
+        renderer.stop();
+        renderer.start(file, this, userSprites);
         renderer.setScaleX(panel.widthProperty().doubleValue() / renderer.widthProperty().doubleValue());
         renderer.setScaleY(panel.widthProperty().doubleValue() / renderer.widthProperty().doubleValue());
         renderer.requestFocus();
         stage.setTitle("WRoom " + WebRoom.VERSION + " - " + file.getTitle());
         updateLabelMessage("Welcome to " + file.getTitle().trim());
-        topPanel.toFront();
-        bottomPanel.toFront();
         chatHost = file.getChatHost();
         chatroom = file.getChatroom();
         chatPort = file.getChatPort();

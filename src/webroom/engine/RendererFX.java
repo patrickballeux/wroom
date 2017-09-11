@@ -9,6 +9,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import javafx.animation.AnimationTimer;
+import javafx.scene.CacheHint;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.PixelFormat;
@@ -42,12 +43,245 @@ public class RendererFX extends Canvas {
     PixelFormat<IntBuffer> pixelFormat = PixelFormat.getIntArgbInstance();
     private long lastTouchPressed = 0;
 
-    public RendererFX(RoomFile file, Message listener, ArrayList<Sprite> userSprites) {
+    public RendererFX() {
+        setOnKeyPressed((event) -> {
+            if (camera != null) {
+
+                requestFocus();
+                switch (event.getCode()) {
+                    case LEFT:
+                    case A:
+                        camera.left = true;
+                        break;
+                    case RIGHT:
+                    case D:
+                        camera.right = true;
+                        break;
+                    case DOWN:
+                    case S:
+                        camera.back = true;
+                        break;
+                    case UP:
+                    case W:
+                        camera.forward = true;
+                        break;
+                    case SPACE:
+                        sendOnAction(0);
+                        break;
+                    case CONTROL:
+                        camera.strafe = true;
+                        break;
+                    case SHIFT:
+                        camera.runFactor = 1.8;
+                        break;
+                }
+            }
+            event.consume();
+        });
+
+        setOnMouseClicked((event) -> {
+            if (camera != null) {
+
+                requestFocus();
+                if (event.getClickCount() == 2) {
+                    sendOnAction(event.getX());
+                }
+            }
+            event.consume();
+        });
+
+        setOnKeyReleased((event) -> {
+            if (camera != null) {
+
+                switch (event.getCode()) {
+                    case LEFT:
+                    case A:
+                        camera.left = false;
+                        break;
+                    case RIGHT:
+                    case D:
+                        camera.right = false;
+                        break;
+                    case DOWN:
+                    case S:
+                        camera.back = false;
+                        break;
+                    case UP:
+                    case W:
+                        camera.forward = false;
+                        break;
+                    case CONTROL:
+                        camera.strafe = false;
+                        break;
+                    case SHIFT:
+                        camera.runFactor = 1;
+                        break;
+                    case C:
+                        listener.onChatRequest();
+                        break;
+                }
+            }
+            event.consume();
+        });
+        setOnTouchPressed((event) -> {
+            if (camera != null) {
+                if (lastTouched != null) {
+                    if (System.currentTimeMillis() - lastTouchPressed < 300) {
+                        sendOnAction(0);
+                    }
+                }
+                lastTouchPressed = System.currentTimeMillis();
+                lastTouched = event.getTouchPoint();
+            }
+
+            event.consume();
+        });
+        setOnTouchReleased((event) -> {
+            if (camera != null) {
+                camera.left = false;
+                camera.right = false;
+                camera.forward = false;
+                camera.back = false;
+                lastTouched = event.getTouchPoint();
+            }
+            event.consume();
+        });
+        setOnTouchMoved((event) -> {
+            if (camera != null) {
+                if (lastTouched.getX() + 30 < event.getTouchPoint().getX()) {
+                    camera.right = true;
+                    camera.left = false;
+                } else if (lastTouched.getX() - 30 > event.getTouchPoint().getX()) {
+                    camera.left = true;
+                    camera.right = false;
+                } else {
+                    camera.left = false;
+                    camera.right = false;
+                }
+            }
+
+            event.consume();
+        }
+        );
+        setOnTouchStationary(
+                (event) -> {
+                    if (camera != null) {
+                        if (lastTouched.getY() + 30 < event.getTouchPoint().getY()) {
+                            camera.forward = false;
+                            camera.back = true;
+                        }
+                        if (lastTouched.getY() - 30 > event.getTouchPoint().getY()) {
+                            camera.back = false;
+                            camera.forward = true;
+                        }
+                    }
+                    event.consume();
+                }
+        );
+        setFocused(
+                true);
+        int height = 512;
+        int width = height * 4 / 3;
+        pixels = new int[width * height];
+
+        setWidth(width);
+
+        setHeight(height);
+        timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                paint();
+            }
+        };
+        running = true;
+
+        requestFocus();
+    }
+
+    TouchPoint lastTouched;
+
+    private void sendOnAction(double cameraX) {
+        double rayDirX = camera.xDir + camera.xPlane * cameraX;
+        double rayDirY = camera.yDir + camera.yPlane * cameraX;
+        //Map position
+        int mapX = (int) camera.xPos;
+        int mapY = (int) camera.yPos;
+        //length of ray from current position to next x or y-side
+        double sideDistX;
+        double sideDistY;
+        //Length of ray from one side to next in map
+        double deltaDistX = Math.sqrt(1 + (rayDirY * rayDirY) / (rayDirX * rayDirX));
+        double deltaDistY = Math.sqrt(1 + (rayDirX * rayDirX) / (rayDirY * rayDirY));
+        //Direction to go in x and y
+        int stepX, stepY;
+        boolean hit = false;//was a wall hit
+        //Figure out the step direction and initial distance to a side
+        if (rayDirX < 0) {
+            stepX = -1;
+            sideDistX = (camera.xPos - mapX) * deltaDistX;
+        } else {
+            stepX = 1;
+            sideDistX = (mapX + 1.0 - camera.xPos) * deltaDistX;
+        }
+        if (rayDirY < 0) {
+            stepY = -1;
+            sideDistY = (camera.yPos - mapY) * deltaDistY;
+        } else {
+            stepY = 1;
+            sideDistY = (mapY + 1.0 - camera.yPos) * deltaDistY;
+        }
+        //Loop to find where the ray hits a wall
+        int counter = 0; // testing only block away for 3 times
+        while (!hit && counter++ < 2) {
+            //Jump to next square
+            if (sideDistX < sideDistY) {
+                sideDistX += deltaDistX;
+                mapX += stepX;
+            } else {
+                sideDistY += deltaDistY;
+                mapY += stepY;
+            }
+            //Check if ray has hit a wall
+            if (!hit && map[mapX][mapY] > 0) {
+                hit = true;
+            } else //Check if ray has hit a sprite
+            {
+                for (Sprite s : sprites) {
+                    if (((int) s.y) == (int) mapX && ((int) s.x) == (int) mapY) {
+                        hit = true;
+                    }
+                }
+            }
+        }
+        if (hit) {
+            listener.OnAction((int) mapY, (int) mapX);
+        }
+    }
+
+    public ArrayList<Texture> getTextures() {
+        return textures;
+    }
+
+    public int[][] getMap() {
+        return map;
+    }
+
+    public ArrayList<Sprite> getSprites() {
+        return sprites;
+    }
+
+    public Camera getCamera() {
+        return camera;
+    }
+
+    public synchronized void start(RoomFile file, Message listener, ArrayList<Sprite> userSprites) {
         this.userSprites = userSprites;
         pixels = new int[(Texture.SIZE * 4 / 3) * Texture.SIZE];
         textures = file.getTextures();
         floor = file.getFloor();
         ceiling = file.getCeiling();
+        setCache(true);
+        setCacheHint(CacheHint.QUALITY);
         map = file.getMap();
         this.listener = listener;
         double startX = file.getStartX();
@@ -148,225 +382,19 @@ public class RendererFX extends Canvas {
             map[y][x] = textures.size();
         }
         camera = new Camera(startX, startY, 1, 0, 0, -.66, listener);
-        int height = 512;
-        int width = height * 4 / 3;
-        pixels = new int[width * height];
-        screen = new Screen(map, textures, width, height, floor, ceiling, sprites, userSprites);
-        setOnKeyPressed((event) -> {
-            requestFocus();
-            switch (event.getCode()) {
-                case LEFT:
-                case A:
-                    camera.left = true;
-                    break;
-                case RIGHT:
-                case D:
-                    camera.right = true;
-                    break;
-                case DOWN:
-                case S:
-                    camera.back = true;
-                    break;
-                case UP:
-                case W:
-                    camera.forward = true;
-                    break;
-                case SPACE:
-                    sendOnAction(0);
-                    break;
-                case CONTROL:
-                    camera.strafe = true;
-                    break;
-                case SHIFT:
-                    camera.runFactor = 1.8;
-                    break;
-            }
-
-            event.consume();
-        });
-
-        setOnMouseClicked((event) -> {
-            requestFocus();
-            if (event.getClickCount() == 2) {
-                sendOnAction(event.getX());
-            }
-            event.consume();
-        });
-
-        setOnKeyReleased((event) -> {
-            switch (event.getCode()) {
-                case LEFT:
-                case A:
-                    camera.left = false;
-                    break;
-                case RIGHT:
-                case D:
-                    camera.right = false;
-                    break;
-                case DOWN:
-                case S:
-                    camera.back = false;
-                    break;
-                case UP:
-                case W:
-                    camera.forward = false;
-                    break;
-                case CONTROL:
-                    camera.strafe = false;
-                    break;
-                case SHIFT:
-                    camera.runFactor = 1;
-                    break;
-                case C:
-                    listener.onChatRequest();
-                    break;
-            }
-            event.consume();
-        });
-        setOnTouchPressed((event) -> {
-            if (lastTouched != null) {
-                if (System.currentTimeMillis() - lastTouchPressed < 300) {
-                    sendOnAction(0);
-                }
-            }
-            lastTouchPressed = System.currentTimeMillis();
-            lastTouched = event.getTouchPoint();
-            event.consume();
-        });
-        setOnTouchReleased((event) -> {
-            camera.left = false;
-            camera.right = false;
-            camera.forward = false;
-            camera.back = false;
-            lastTouched = event.getTouchPoint();
-            event.consume();
-        });
-        setOnTouchMoved((event) -> {
-            if (lastTouched.getX() + 30 < event.getTouchPoint().getX()) {
-                camera.right = true;
-                camera.left = false;
-            } else if (lastTouched.getX() - 30 > event.getTouchPoint().getX()) {
-                camera.left = true;
-                camera.right = false;
-            } else {
-                camera.left = false;
-                camera.right = false;
-            }
-            event.consume();
-        });
-        setOnTouchStationary((event) -> {
-            //camera.right = false;
-            //camera.left = false;
-            if (lastTouched.getY() + 30 < event.getTouchPoint().getY()) {
-                camera.forward = false;
-                camera.back = true;
-            }
-            if (lastTouched.getY() - 30 > event.getTouchPoint().getY()) {
-                camera.back = false;
-                camera.forward = true;
-            }
-            event.consume();
-        });
-        setFocused(true);
-        setWidth(width);
-        setHeight(height);
-        timer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                paint();
-            }
-        };
-        running = true;
-        requestFocus();
-    }
-
-    TouchPoint lastTouched;
-
-    private void sendOnAction(double cameraX) {
-        double rayDirX = camera.xDir + camera.xPlane * cameraX;
-        double rayDirY = camera.yDir + camera.yPlane * cameraX;
-        //Map position
-        int mapX = (int) camera.xPos;
-        int mapY = (int) camera.yPos;
-        //length of ray from current position to next x or y-side
-        double sideDistX;
-        double sideDistY;
-        //Length of ray from one side to next in map
-        double deltaDistX = Math.sqrt(1 + (rayDirY * rayDirY) / (rayDirX * rayDirX));
-        double deltaDistY = Math.sqrt(1 + (rayDirX * rayDirX) / (rayDirY * rayDirY));
-        //Direction to go in x and y
-        int stepX, stepY;
-        boolean hit = false;//was a wall hit
-        //Figure out the step direction and initial distance to a side
-        if (rayDirX < 0) {
-            stepX = -1;
-            sideDistX = (camera.xPos - mapX) * deltaDistX;
-        } else {
-            stepX = 1;
-            sideDistX = (mapX + 1.0 - camera.xPos) * deltaDistX;
-        }
-        if (rayDirY < 0) {
-            stepY = -1;
-            sideDistY = (camera.yPos - mapY) * deltaDistY;
-        } else {
-            stepY = 1;
-            sideDistY = (mapY + 1.0 - camera.yPos) * deltaDistY;
-        }
-        //Loop to find where the ray hits a wall
-        int counter = 0; // testing only block away for 3 times
-        while (!hit && counter++ < 2) {
-            //Jump to next square
-            if (sideDistX < sideDistY) {
-                sideDistX += deltaDistX;
-                mapX += stepX;
-            } else {
-                sideDistY += deltaDistY;
-                mapY += stepY;
-            }
-            //Check if ray has hit a wall
-            if (!hit && map[mapX][mapY] > 0) {
-                hit = true;
-            } else //Check if ray has hit a sprite
-            {
-                for (Sprite s : sprites) {
-                    if (((int) s.y) == (int) mapX && ((int) s.x) == (int) mapY) {
-                        hit = true;
-                    }
-                }
-            }
-        }
-        if (hit) {
-            listener.OnAction((int) mapY, (int) mapX);
-        }
-    }
-
-    public ArrayList<Texture> getTextures() {
-        return textures;
-    }
-
-    public int[][] getMap() {
-        return map;
-    }
-
-    public ArrayList<Sprite> getSprites() {
-        return sprites;
-    }
-
-    public Camera getCamera() {
-        return camera;
-    }
-
-    public synchronized void start() {
+        screen = new Screen(map, textures, Texture.SIZE * 4 / 3, Texture.SIZE, floor, ceiling, sprites, userSprites);
         running = true;
         timer.start();
     }
 
     public synchronized void stop() {
         running = false;
-        for (Texture t : textures) {
-            t.stop();
+        if (textures != null) {
+            for (Texture t : textures) {
+                t.stop();
+            }
+            timer.stop();
         }
-        timer.stop();
     }
 
     public void addMessage(String msg) {
