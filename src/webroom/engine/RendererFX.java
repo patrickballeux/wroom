@@ -338,7 +338,7 @@ public class RendererFX extends Canvas {
             double y = Integer.parseInt(key.split(",")[1]);
             x += 0.5;
             y += 0.5;
-            s.texture = new Texture(dlIcon,"<div style='text-align:center;font-size:24px;color:#111111;border: 2px solid #111111;background-color:WHITE;'>" + file.getDownloads().get(key).getFile()+"</div>",0);
+            s.texture = new Texture(dlIcon, "<div style='text-align:center;font-size:24px;color:#111111;border: 2px solid #111111;background-color:WHITE;'>" + file.getDownloads().get(key).getFile() + "</div>", 0);
             s.x = x;
             s.y = y;
             s.distance = 0;
@@ -444,9 +444,7 @@ public class RendererFX extends Canvas {
             try {
                 screen.update(camera, pixels);
             } catch (Exception ex) {
-                if (!ex.getMessage().equals("null")) {
-                    System.err.println("ERROR: " + ex.getMessage());
-                }
+                ex.printStackTrace();
             }
             camera.update(map);
             //draw Pixels

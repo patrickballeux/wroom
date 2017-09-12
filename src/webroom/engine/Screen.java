@@ -11,11 +11,12 @@ public class Screen {
     private final Texture ceiling;
     private ArrayList<Sprite> systemSprites;
     private ArrayList<Sprite> userSprites;
-private java.util.Comparator<Sprite> sorter;
+    private java.util.Comparator<Sprite> sorter;
+
     public Screen(int[][] m, ArrayList<Texture> tex, int w, int h, Texture f, Texture c, ArrayList<Sprite> sprites, ArrayList<Sprite> usersprites) {
         // inverse x and y as calculus are made for y,x
         map = m;
-        textures = tex;
+        textures = new ArrayList<Texture>(tex);
         width = w;
         height = h;
         floor = f;
@@ -30,7 +31,6 @@ private java.util.Comparator<Sprite> sorter;
         };
     }
 
-    
     public int[] update(Camera camera, int[] pixels) {
         double[] ZBuffer = new double[width];
         double cameraX, rayDirX, rayDirY, sideDistX, sideDistY, deltaDistX, deltaDistY, perpWallDist;
@@ -115,6 +115,9 @@ private java.util.Comparator<Sprite> sorter;
             wallX -= Math.floor(wallX);
             //x coordinate on the texture
             Texture selectedTexture = textures.get(texNum);
+            if (selectedTexture == null) {
+                return pixels;
+            }
             int texX = (int) (wallX * (Texture.SIZE));
             if (side == 0 && rayDirX > 0) {
                 texX = Texture.SIZE - texX - 1;
@@ -125,6 +128,9 @@ private java.util.Comparator<Sprite> sorter;
             //calculate y coordinate on texture
             for (int y = drawStart; y < drawEnd; y++) {
                 int texY = (((y * 2 - height + lineHeight) << 8) / lineHeight) / 1;
+                if (selectedTexture.pixels == null) {
+                    break;
+                }
                 int color = selectedTexture.pixels[texX + (texY * Texture.SIZE)];
                 pixels[x + y * (width)] = color;
             }
@@ -224,7 +230,9 @@ private java.util.Comparator<Sprite> sorter;
                     {
                         int d = (y) * 256 - height * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
                         int texY = ((d * Texture.SIZE) / spriteHeight) / 256;
-
+                        if (selectedSprite.texture == null || selectedSprite.texture.pixels == null) {
+                            break;
+                        }
                         int color = selectedSprite.texture.pixels[(Texture.SIZE * texY) + texX]; //get current color from the texture
                         if ((color & 0x00FFFFFF) != 0) {
                             pixels[(y * width) + stripe] = color; //paint pixel if it isn't black, black is the invisible color
