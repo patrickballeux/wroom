@@ -505,6 +505,7 @@ public class WebRoomFX extends Application implements Message {
             @Override
             public void run() {
                 InputStream in = null;
+                RandomAccessFile out = null;
                 try {
                     File down = new File("Downloads");
                     if (!down.exists()) {
@@ -513,25 +514,33 @@ public class WebRoomFX extends Application implements Message {
                     in = url.openStream();
                     String[] parts = url.getFile().split("/");
                     java.io.File file = new java.io.File(down, parts[parts.length - 1]);
-                    RandomAccessFile out = new RandomAccessFile(file, "rw");
+                    out = new RandomAccessFile(file, "rw");
                     updateLabelMessage("Downloading " + file.getName());
-                    byte[] buffer = new byte[65536];
+                    byte[] buffer = new byte[65536*4];
                     int count = in.read(buffer);
                     while (count != -1) {
-                        updateLabelMessage("Downloading " + file.getName() + "(" + count + " bytes)");
+                        updateLabelMessage("Downloading " + file.getName());
                         count = in.read(buffer);
                         if (count != -1) {
                             out.write(buffer, 0, count);
                         }
                     }
-                    updateLabelMessage("Downloading completed for " + file.getName());
-                    out.close();
-                    in.close();
+                    updateLabelMessage("Download complete for " + file.getName());
                 } catch (IOException ex) {
+                    updateLabelMessage("!! Download error !!");
                     Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
                     try {
-                        in.close();
+                        if (in != null) {
+                            in.close();
+                        }
+                    } catch (IOException ex) {
+                        Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    try {
+                        if (out != null) {
+                            out.close();
+                        }
                     } catch (IOException ex) {
                         Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
                     }
