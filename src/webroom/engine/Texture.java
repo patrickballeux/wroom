@@ -32,7 +32,16 @@ public class Texture implements Runnable {
 
     @Override
     public void run() {
-        animate();
+        do {
+            try {
+                animate();
+                for (int i = 0; i < reloadTime && !mStopMe; i++) {
+                    Thread.sleep(1000);
+                }
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Texture.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } while (!mStopMe && reloadTime > 0);
     }
 
     public boolean isReady() {
@@ -63,6 +72,13 @@ public class Texture implements Runnable {
     }
 
     public Texture(Texture t, String text, long reloadTime) {
+        if (text.contains("@REFRESH30SEC")) {
+            text = text.replaceAll("@REFRESH30SEC", "");
+            reloadTime = 30;
+        } else if (text.contains("@REFRESH120SEC")) {
+            text = text.replaceAll("@REFRESH120SEC", "");
+            reloadTime = 120;
+        }
         original = t;
         this.text = text;
         this.reloadTime = reloadTime;

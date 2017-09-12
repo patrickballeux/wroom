@@ -431,7 +431,9 @@ public class RendererFX extends Canvas {
             try {
                 screen.update(camera, pixels);
             } catch (Exception ex) {
-                System.err.println("ERROR: " + ex.getMessage());
+                if (!ex.getMessage().equals("null")) {
+                    System.err.println("ERROR: " + ex.getMessage());
+                }
             }
             camera.update(map);
             //draw Pixels
