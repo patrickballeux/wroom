@@ -130,7 +130,11 @@ public class RoomFile {
                         notification.put((action[1] + "," + action[2]).trim(), action[3]);
                         break;
                     case "download":
-                        downloads.put((action[1] + "," + action[2]).trim(), new URL(action[3]));
+                        String dlFile = action[3].trim();
+                        if (!dlFile.toLowerCase().startsWith("http") && !dlFile.toLowerCase().startsWith("file:")){
+                            dlFile = base.toString() + "/" + dlFile;
+                        }
+                        downloads.put((action[1] + "," + action[2]).trim(), new URL(dlFile));
                         break;
                     case "media":
                         medias.put((action[1] + "," + action[2]).trim(), new URL(action[3]));

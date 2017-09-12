@@ -49,7 +49,7 @@ action=browse,3,8,https://www.babylonjs.com/
 action=sound,3,7,teleport.wav
 action=door,11,3
 
-#action=download,6,6,http://crombz.com/wroom/floor.jpg
+action=download,6,6,http://crombz.com/wroom/floor.jpg
 action=message,6,7,You are near a teleporter...
 action=media,1,6,http://wroom.crombz.com/BigBuckBunny_640x360.mp4
 action=message,1,6,Playing Big Buck Bunny video...

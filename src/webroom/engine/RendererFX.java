@@ -305,6 +305,7 @@ public class RendererFX extends Canvas {
         Texture teleporticon = new Texture(getClass().getResource("/webroom/gui/teleport.png"));
         Texture mediaicon = new Texture(getClass().getResource("spritemediaplay.png"));
         Texture webicon = new Texture(getClass().getResource("spriteweblink.png"));
+        Texture dlIcon = new Texture(getClass().getResource("download.png"));
         sprites = new ArrayList<>();
         for (String key : teleports.keySet()) {
             Sprite s = new Sprite();
@@ -326,6 +327,18 @@ public class RendererFX extends Canvas {
             y += 0.5;
             Texture media = new Texture(file.getMedias().get(key), true);
             s.texture = media;
+            s.x = x;
+            s.y = y;
+            s.distance = 0;
+            sprites.add(s);
+        }
+        for (String key : file.getDownloads().keySet()) {
+            Sprite s = new Sprite();
+            double x = Integer.parseInt(key.split(",")[0]);
+            double y = Integer.parseInt(key.split(",")[1]);
+            x += 0.5;
+            y += 0.5;
+            s.texture = new Texture(dlIcon,"<div style='text-align:center;font-size:24px;color:#111111;border: 2px solid #111111;background-color:WHITE;'>" + file.getDownloads().get(key).getFile()+"</div>",0);
             s.x = x;
             s.y = y;
             s.distance = 0;
