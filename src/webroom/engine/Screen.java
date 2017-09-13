@@ -170,9 +170,11 @@ public class Screen {
                 floorTexX = (int) (currentFloorX * floor.SIZE) % floor.SIZE;
                 floorTexY = (int) (currentFloorY * floor.SIZE) % floor.SIZE;
                 //ceiling (symmetrical!)
+                if (ceiling.pixels == null) break;
                 int ceilingColor = ceiling.pixels[(ceiling.SIZE * floorTexY) + floorTexX];
                 pixels[x + ((height - y) * width)] = ceilingColor;
                 //floor
+                if (floor.pixels == null) break;
                 int floorColor = floor.pixels[floor.SIZE * floorTexY + floorTexX];
                 pixels[x + (y * width)] = floorColor;
             }
@@ -233,6 +235,7 @@ public class Screen {
                         if (selectedSprite.texture == null || selectedSprite.texture.pixels == null) {
                             break;
                         }
+                        if (selectedSprite.texture == null || selectedSprite.texture.pixels == null ) break;
                         int color = selectedSprite.texture.pixels[(Texture.SIZE * texY) + texX]; //get current color from the texture
                         if ((color & 0x00FFFFFF) != 0) {
                             pixels[(y * width) + stripe] = color; //paint pixel if it isn't black, black is the invisible color

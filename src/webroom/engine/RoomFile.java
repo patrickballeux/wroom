@@ -159,7 +159,7 @@ public class RoomFile {
                     if (singletext.toLowerCase().startsWith("youtube=")){
                         //we have a youtube video to embed...
                         String key = singletext.substring(singletext.indexOf("=")+1);
-                        singletext = "<div style='text-align:center;'><img src='http://img.youtube.com/vi/"+key+"/0.jpg' width="+Texture.SIZE+" height="+Texture.SIZE+"></div>";
+                        singletext = "<div style='text-align:center;' ><img src='http://img.youtube.com/vi/"+key+"/0.jpg' width="+(Texture.SIZE-60)+" height="+(Texture.SIZE-60)+"></div><div style='font-size:32px;font-name:monospaced;text-align:center;color:white;background-color:red;'>-- Youtube --</div>";
                         embeded.put(text[0] + "," + text[1], text[2].trim());
                     }
                     texts.put(text[0] + "," + text[1], singletext);
