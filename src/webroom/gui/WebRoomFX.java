@@ -6,6 +6,7 @@
 package webroom.gui;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -123,6 +124,7 @@ public class WebRoomFX extends Application implements Message {
                 root.getChildren().remove(listHistories);
             }
         });
+        loatHistories();
 
         btnOpenFile = new Button("...");
         btnOpenFile.setOnAction((event) -> {
@@ -234,6 +236,7 @@ public class WebRoomFX extends Application implements Message {
         });
         primaryStage.show();
         primaryStage.setOnCloseRequest((event) -> {
+            saveHistories();
             if (renderer != null) {
                 renderer.stop();
             }
@@ -516,7 +519,7 @@ public class WebRoomFX extends Application implements Message {
                     java.io.File file = new java.io.File(down, parts[parts.length - 1]);
                     out = new RandomAccessFile(file, "rw");
                     updateLabelMessage("Downloading " + file.getName());
-                    byte[] buffer = new byte[65536*4];
+                    byte[] buffer = new byte[65536 * 4];
                     int count = in.read(buffer);
                     while (count != -1) {
                         updateLabelMessage("Downloading " + file.getName());
@@ -741,6 +744,55 @@ public class WebRoomFX extends Application implements Message {
             lblMessage.setText("Chatting...");
             txtChat.requestFocus();
             txtChat.setText("");
+        }
+    }
+
+    private void loatHistories() {
+        RandomAccessFile raf = null;
+        try {
+            File file = new File("history.txt");
+            if (file.exists()) {
+                raf = new RandomAccessFile(file, "r");
+                while (raf.getFilePointer() < raf.length()) {
+                    itemHistories.add(raf.readLine());
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (raf != null) {
+                    raf.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }
+
+    private void saveHistories() {
+        RandomAccessFile raf = null;
+        try {
+            File file = new File("history.txt");
+            raf = new RandomAccessFile(file, "rw");
+            raf.setLength(0);
+            for (Object h : itemHistories.toArray()) {
+                raf.write((h.toString() + "\r\n").getBytes());
+            }
+            raf.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                raf.close();
+            } catch (IOException ex) {
+                Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 }
