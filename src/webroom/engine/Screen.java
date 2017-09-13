@@ -77,7 +77,6 @@ public class Screen {
                     side = 1;
                 }
                 //Check if ray has hit a wall
-                //System.out.println(mapX + ", " + mapY + ", " + map[mapX][mapY]);
                 if (map[mapX][mapY] > 0) {
                     hit = true;
                 }
@@ -118,7 +117,7 @@ public class Screen {
             if (selectedTexture == null) {
                 return pixels;
             }
-            int texX = (int) (wallX * (Texture.SIZE));
+            int texX = (int) (wallX * Texture.SIZE);
             if (side == 0 && rayDirX > 0) {
                 texX = Texture.SIZE - texX - 1;
             }
@@ -127,7 +126,7 @@ public class Screen {
             }
             //calculate y coordinate on texture
             for (int y = drawStart; y < drawEnd; y++) {
-                int texY = (((y * 2 - height + lineHeight) << 8) / lineHeight) / 1;
+                int texY = (((y*2  - height + lineHeight) * Texture.SIZE/2) / lineHeight);
                 if (selectedTexture.pixels == null) {
                     break;
                 }
@@ -160,7 +159,7 @@ public class Screen {
                 drawEnd = height; //becomes < 0 when the integer overflows
             }
             //draw the floor from drawEnd to the bottom of the screen
-            for (int y = drawEnd + 1; y < height; y++) {
+            for (int y = drawEnd ; y < height; y++) {
                 currentDist = height / (2.0 * y - height); //you could make a small lookup table for this instead
                 double weight = (currentDist) / (distWall);
                 double currentFloorX = weight * floorXWall + (1.0 - weight) * camera.xPos;
@@ -226,12 +225,12 @@ public class Screen {
             }
             //loop through every vertical stripe of the sprite on screen
             for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
-                int texX = (int) (256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * Texture.SIZE / spriteWidth) / 256;
+                int texX = (int) ((Texture.SIZE/2) * (stripe - (-spriteWidth / 2 + spriteScreenX)) * Texture.SIZE / spriteWidth) / (Texture.SIZE /2);
                 if (transformY > 0 && stripe > 0 && stripe < width && transformY < ZBuffer[stripe]) {
                     for (int y = drawStartY; y < drawEndY; y++) //for every pixel of the current stripe
                     {
-                        int d = (y) * 256 - height * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
-                        int texY = ((d * Texture.SIZE) / spriteHeight) / 256;
+                        int d = (y) * (Texture.SIZE/2) - height * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
+                        int texY = ((d * Texture.SIZE) / spriteHeight) / (Texture.SIZE/2);
                         if (selectedSprite.texture == null || selectedSprite.texture.pixels == null) {
                             break;
                         }
