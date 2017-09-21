@@ -16,5 +16,6 @@ public class Sprite {
     public Texture texture;
     double distance;
     public String id = "";
+    public String imageURL = "";
 
 }

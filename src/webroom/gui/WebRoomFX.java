@@ -89,10 +89,12 @@ public class WebRoomFX extends Application implements Message {
     private Clip bgSound = null;
     private ObservableList<String> itemHistories;
     private ListView<String> listHistories;
+    private String userAvatar;
 
     @Override
     public void start(Stage primaryStage) throws KeyManagementException, NoSuchAlgorithmException {
         preferences = java.util.prefs.Preferences.userNodeForPackage(this.getClass());
+        userAvatar = preferences.get("useravatarurl", "");
         userImage = new Texture(getClass().getResource("/webroom/engine/user.png"));
         panel = new BorderPane();
 
@@ -164,6 +166,13 @@ public class WebRoomFX extends Application implements Message {
         txtChat.setOpacity(0.8);
         txtChat.setOnKeyPressed((event) -> {
             if (event.getCode() == KeyCode.ENTER) {
+                if (txtChat.getText().startsWith("/avatar")) {
+                    userAvatar = txtChat.getText().replaceFirst("/avatar ", "");
+                    preferences.put("avatar", userAvatar);
+                } else if (txtChat.getText().startsWith("/nick")) {
+                    String nick = txtChat.getText().replaceFirst("/nick ", "");
+                    preferences.put("nick", nick);
+                }
                 if (irc != null) {
                     irc.doPrivmsg(chatroom, txtChat.getText().trim());
                     lblMessage.setText("Me: " + txtChat.getText().trim());
@@ -277,12 +286,20 @@ public class WebRoomFX extends Application implements Message {
             chatPort = file.getChatPort();
             userSprites.clear();
 
+//            Sprite text = new Sprite();
+//            text.id = "Robot";
+//            text.x = 1.5;
+//            text.y = 1.5;            
+//            setUserSpriteMessage(text, "Hi to all", "Robot", "https://pbs.twimg.com/profile_images/512735871548665857/TcE8kqVn.jpeg");
+//            userSprites.add(text);
+
             if (irc == null) {
                 connectToIRC();
             } else {
                 irc.doJoin(chatroom);
             }
             playBackgroundSound(file.getBackgroundSound());
+
         } catch (MalformedURLException ex) {
             lblMessage.setText("!!URL is invalid!!");
         } catch (IOException ex) {
@@ -313,6 +330,18 @@ public class WebRoomFX extends Application implements Message {
         } catch (LineUnavailableException ex) {
             Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private void setUserSpriteMessage(Sprite s, String msg, String nick, String imageURL) {
+        String text;
+        text = "<div style='text-align:center;color:white;font-size:24px;'>" + nick + "</div>";
+        if (imageURL.length() > 0) {
+            text += "<center><img src='" + imageURL + "' width=100 height=100 ></center";
+        }
+        if (msg.length() > 0) {
+            text += "<center><font style='color:white;background-color:#111111;font-size:18px'>" + msg + "</font></center>";
+        }
+        s.texture = new Texture(userImage, text, 0);
     }
 
     /**
@@ -468,7 +497,11 @@ public class WebRoomFX extends Application implements Message {
     @Override
     public void OnTrigger(int x, int y) {
         if (irc != null && irc.isConnected()) {
-            irc.doPrivmsg(chatroom, "MOVING TO:" + x + "x" + y);
+            if (userAvatar.length() == 0) {
+                irc.doPrivmsg(chatroom, "MOVING TO:" + x + "x" + y);
+            } else {
+                irc.doPrivmsg(chatroom, "MOVING TO:" + x + "x" + y + "x" + userAvatar);
+            }
         }
     }
 
@@ -568,6 +601,7 @@ public class WebRoomFX extends Application implements Message {
         if (nick.length() == 0) {
             nick = "Guest__" + System.currentTimeMillis();
         }
+        userAvatar = preferences.get("avatar", userAvatar);
         //builder.realname(nick);
         builder.nick(nick);
         config = builder.build();
@@ -587,7 +621,7 @@ public class WebRoomFX extends Application implements Message {
                     Sprite s = new Sprite();
                     s.x = 0;
                     s.y = 0;
-                    s.texture = new Texture(userImage, "<div style='text-align:center;color:white;background-color:#111;'>" + user.getNick() + "</div>", 0);
+                    setUserSpriteMessage(s, "", user.getNick(), "");
                     s.id = user.getNick();
                     userSprites.add(s);
                 }
@@ -625,7 +659,7 @@ public class WebRoomFX extends Application implements Message {
                             Sprite sp = new Sprite();
                             sp.x = 0;
                             sp.y = 0;
-                            sp.texture = new Texture(userImage, "<div style='text-align:center;color:white;background-color:#111;'>" + s + "</div>", 0);
+                            setUserSpriteMessage(sp, "", s, "");
                             sp.id = s.replaceFirst("@", "");
                             userSprites.add(sp);
                             System.out.println("Added sprite for usre: " + s);
@@ -689,8 +723,13 @@ public class WebRoomFX extends Application implements Message {
                 if (msg.startsWith("MOVING TO:")) {
                     double x = Double.parseDouble(msg.split(":")[1].split("x")[0]) + 0.5;
                     double y = Double.parseDouble(msg.split(":")[1].split("x")[1]) + 0.5;
+                    String url = "";
+                    if (msg.split(":")[1].split("x").length == 3) {
+                        url = msg.split(":")[1].split("x")[2].trim();
+                    }
                     for (Sprite s : userSprites) {
                         if (s.id.equals(user.getNick())) {
+                            s.imageURL = url;
                             new Thread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -716,7 +755,7 @@ public class WebRoomFX extends Application implements Message {
                     updateLabelMessage(user + "> " + msg);
                     for (Sprite s : userSprites) {
                         if (s.id.equals(user.getNick())) {
-                            s.texture = new Texture(userImage, "<div style='font-size:12px;text-align:center;color:white;background-color:#111;'>" + user.getNick() + "<hr>" + msg + "</div>", 0);
+                            setUserSpriteMessage(s, msg, s.id, s.imageURL);
                             break;
                         }
                     }
