@@ -59,8 +59,14 @@ public class RoomFile {
         in = new URL(finalURL).openStream();
         byte[] buffer = new byte[65536 * 4];
         listener.OnNotification(0, 0, "Loading map...");
-        int count = in.read(buffer);
-        content = new String(buffer, 0, count);
+        int count = 0;
+        while (count != -1){
+            count = in.read(buffer);
+            if (count != -1){
+                content += new String(buffer, 0, count);
+            }
+        }
+        
         in.close();
         String[] lines = content.split("\n");
         ArrayList<String> mapLines = new ArrayList<>();
