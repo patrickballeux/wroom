@@ -46,7 +46,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.JComponent;
 import org.schwering.irc.lib.IRCConfig;
 import org.schwering.irc.lib.IRCConfigBuilder;
 import org.schwering.irc.lib.IRCConnection;
