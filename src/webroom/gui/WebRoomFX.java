@@ -22,7 +22,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Button;
@@ -33,13 +32,13 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
-import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javax.sound.sampled.AudioInputStream;
@@ -199,24 +198,6 @@ public class WebRoomFX extends Application implements Message {
         panel.setBottom(bottomPanel);
         topPanel.toFront();
         renderer.toBack();;
-        renderer.setOnSwipeDown((event) -> {
-            if (!renderer.isRunning()) {
-                WebView web = null;
-                for (Node n : root.getChildren()) {
-                    if (n instanceof WebView) {
-                        web = (WebView) n;
-                        break;
-                    }
-                }
-                if (web != null) {
-                    web.getEngine().loadContent("<html><body><</body></html>");
-                    root.getChildren().remove(web);
-                    renderer.pause();
-                }
-                event.consume();
-                renderer.requestFocus();
-            }
-        });
         primaryStage.setScene(scene);
         primaryStage.widthProperty().addListener((observable) -> {
             double scaleX = primaryStage.widthProperty().doubleValue() / renderer.widthProperty().doubleValue();
@@ -292,7 +273,6 @@ public class WebRoomFX extends Application implements Message {
 //            text.y = 1.5;            
 //            setUserSpriteMessage(text, "Hi to all", "Robot", "https://pbs.twimg.com/profile_images/512735871548665857/TcE8kqVn.jpeg");
 //            userSprites.add(text);
-
             if (irc == null) {
                 connectToIRC();
             } else {
@@ -419,20 +399,11 @@ public class WebRoomFX extends Application implements Message {
             if (renderer.isVisible()) {
                 renderer.pause();
                 playBackgroundSound(null);
-                WebView web = new WebView();
+                MyWebView web = new MyWebView(this, true);
                 web.getEngine().load(url.toString());
-                web.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                    if (oldValue && !newValue) {
-                        web.getEngine().loadContent("<html><body></body></html>");
-                        root.getChildren().remove(web);
-                        renderer.requestFocus();
-                        playBackgroundSound(currentFile.getBackgroundSound());
-                        renderer.pause();
-                    }
-                });
                 root.getChildren().add(web);
                 web.toFront();
-                web.requestFocus();
+                web.getViewer().requestFocus();
                 web.setScaleX(0.95);
                 web.setScaleY(0.85);
             }
@@ -442,7 +413,7 @@ public class WebRoomFX extends Application implements Message {
             if (renderer.isVisible()) {
                 renderer.pause();
                 playBackgroundSound(null);
-                WebView web = new WebView();
+                MyWebView web = new MyWebView(this, false);
                 if (content.startsWith("youtube=")) {
                     content = content.replaceFirst("youtube=", "");
                     content = "<iframe width=\"100%\" height=\"100%\" src='https://www.youtube.com/embed/" + content + "?autoplay=1' frameborder=\"0\" allowfullscreen></iframe>";
@@ -452,21 +423,11 @@ public class WebRoomFX extends Application implements Message {
                 }
                 String html = "<html><body>" + content + "</body></html>";
                 web.getEngine().loadContent(html);
-                web.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                    if (oldValue && !newValue) {
-                        web.getEngine().loadContent("<html><body></body></html>");
-                        root.getChildren().remove(web);
-                        renderer.requestFocus();
-                        playBackgroundSound(currentFile.getBackgroundSound());
-                        renderer.pause();
-                    }
-                });
-
                 root.getChildren().add(web);
                 web.toFront();
                 web.setScaleX(0.95);
                 web.setScaleY(0.85);
-                web.requestFocus();
+                web.getViewer().requestFocus();
             }
         }
         if (currentFile.getDoors().containsKey(loc)) {
@@ -514,10 +475,6 @@ public class WebRoomFX extends Application implements Message {
 
     @Override
     public void OnError(int x, int y, String error) {
-    }
-
-    @Override
-    public void onCloseView(JComponent comp) {
     }
 
     private void playSound(URL file) {
@@ -832,6 +789,17 @@ public class WebRoomFX extends Application implements Message {
             } catch (IOException ex) {
                 Logger.getLogger(WebRoomFX.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+    }
+
+    @Override
+    public void onCloseView(Pane pane) {
+        MyWebView web = (MyWebView) pane;
+        if (web != null) {
+            web.getEngine().loadContent("<html><body><</body></html>");
+            root.getChildren().remove(web);
+            renderer.pause();
+            renderer.requestFocus();
         }
     }
 }

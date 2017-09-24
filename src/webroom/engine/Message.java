@@ -5,8 +5,6 @@
  */
 package webroom.engine;
 
-import javax.swing.JComponent;
-
 /**
  *
  * @author patri
@@ -16,6 +14,6 @@ public interface Message {
     public void OnTrigger(int x, int y);
     public void OnNotification(int x, int y, String msg);
     public void OnError(int x, int y, String error);
-    public void onCloseView(JComponent comp);
+    public void onCloseView(javafx.scene.layout.Pane pane);
     public void onChatRequest();
 }
