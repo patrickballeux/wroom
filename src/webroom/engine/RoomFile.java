@@ -60,13 +60,13 @@ public class RoomFile {
         byte[] buffer = new byte[65536 * 4];
         listener.OnNotification(0, 0, "Loading map...");
         int count = 0;
-        while (count != -1){
+        while (count != -1) {
             count = in.read(buffer);
-            if (count != -1){
+            if (count != -1) {
                 content += new String(buffer, 0, count);
             }
         }
-        
+
         in.close();
         String[] lines = content.split("\n");
         ArrayList<String> mapLines = new ArrayList<>();
@@ -97,10 +97,20 @@ public class RoomFile {
                     textures.add(t);
                 }
             } else if (line.trim().toLowerCase().startsWith("floor=")) {
-                URL file = new URL(base.toString() + "/" + line.split("=")[1]);
+                URL file;
+                if (line.split("=")[1].toLowerCase().startsWith("http")) {
+                    file = new URL(line.split("=")[1].trim());
+                } else {
+                    file = new URL(base.toString() + "/" + line.split("=")[1]);
+                }
                 floor = new Texture(file);
             } else if (line.trim().toLowerCase().startsWith("ceiling=")) {
-                URL file = new URL(base.toString() + "/" + line.split("=")[1]);
+                URL file;
+                if (line.split("=")[1].toLowerCase().startsWith("http")) {
+                    file = new URL(line.split("=")[1].trim());
+                } else {
+                    file = new URL(base.toString() + "/" + line.split("=")[1]);
+                }
                 ceiling = new Texture(file);
             } else if (line.trim().toLowerCase().startsWith("map=")) {
                 mapLines.add(line.split("=")[1].replaceAll(" ", "").trim());
@@ -130,14 +140,18 @@ public class RoomFile {
                         }
                         break;
                     case "sound":
-                        sounds.put((action[1] + "," + action[2]).trim(), new URL(base.toString() + "/" + action[3].trim()));
+                        if (action[3].trim().toLowerCase().startsWith("http")) {
+                            sounds.put((action[1] + "," + action[2]).trim(), new URL(action[3].trim()));
+                        } else {
+                            sounds.put((action[1] + "," + action[2]).trim(), new URL(base.toString() + "/" + action[3].trim()));
+                        }
                         break;
                     case "message":
                         notification.put((action[1] + "," + action[2]).trim(), action[3]);
                         break;
                     case "download":
                         String dlFile = action[3].trim();
-                        if (!dlFile.toLowerCase().startsWith("http") && !dlFile.toLowerCase().startsWith("file:")){
+                        if (!dlFile.toLowerCase().startsWith("http") && !dlFile.toLowerCase().startsWith("file:")) {
                             dlFile = base.toString() + "/" + dlFile;
                         }
                         downloads.put((action[1] + "," + action[2]).trim(), new URL(dlFile));
@@ -162,10 +176,10 @@ public class RoomFile {
                 if (text.length == 3) {
                     //Text is on a single ligne...
                     String singletext = text[2].trim();
-                    if (singletext.toLowerCase().startsWith("youtube=")){
+                    if (singletext.toLowerCase().startsWith("youtube=")) {
                         //we have a youtube video to embed...
-                        String key = singletext.substring(singletext.indexOf("=")+1);
-                        singletext = "<div style='text-align:center;' ><img src='http://img.youtube.com/vi/"+key+"/0.jpg' width="+(Texture.SIZE-60)+" height="+(Texture.SIZE-60)+"></div><div style='font-size:32px;font-name:monospaced;text-align:center;color:white;background-color:red;'>-- Youtube --</div>";
+                        String key = singletext.substring(singletext.indexOf("=") + 1);
+                        singletext = "<div style='text-align:center;' ><img src='http://img.youtube.com/vi/" + key + "/0.jpg' width=" + (Texture.SIZE - 60) + " height=" + (Texture.SIZE - 60) + "></div><div style='font-size:32px;font-name:monospaced;text-align:center;color:white;background-color:red;'>-- Youtube --</div>";
                         embeded.put(text[0] + "," + text[1], text[2].trim());
                     }
                     texts.put(text[0] + "," + text[1], singletext);
